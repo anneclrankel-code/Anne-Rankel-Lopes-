@@ -3,7 +3,7 @@
 App de agenda do estúdio da Fabi, nail designer. Funciona no navegador do celular e pode ser
 instalado na tela inicial como se fosse um aplicativo (é o que se chama de **PWA**).
 
-Esta é a **Etapa 1 (Agendamento), versão 2**. O painel financeiro (Etapa 2) e o agendamento por áudio
+Esta é a **Etapa 1 (Agendamento), versão 3**. O painel financeiro (Etapa 2) e o agendamento por áudio
 ficam para versões futuras.
 
 ---
@@ -12,7 +12,7 @@ ficam para versões futuras.
 
 | Tela | O que tem |
 |---|---|
-| **Agenda** | Filtro **Dia / Semana / Mês**, sempre com atendimentos e bloqueios. Setas para avançar ou voltar (um dia, uma semana ou um mês), toque no título para abrir o calendário e em “ver dia ›” para abrir aquele dia. Botões **+ Agendar** e **Bloquear horário** (ex.: almoço). |
+| **Agenda** | Calendário visual parecido com o Google Agenda, com **Dia / Semana / Mês**. No **dia** e na **semana**, uma grade das 6h às 18h mostra cada atendimento como um bloco do tamanho da duração, os bloqueios (ex.: almoço) listrados e os **horários livres em verde** — tocar num espaço verde abre o novo agendamento já com aquele horário. No **mês**, cada dia mostra os atendimentos, os bloqueios e quanto tempo livre sobra (ex.: “3h”); tocar no dia abre a visão do dia. Setas para avançar/voltar, toque no título para abrir o calendário do celular, botões **+ Agendar** e **Bloquear horário**. |
 | **Novo agendamento** | Nome da cliente, telefone, **um ou mais serviços**, data e **horário de início digitado** (como no Google Agenda, aceita minutos quebrados: `9:05`, `905` ou `9h05`). A duração vem preenchida com a soma das durações sugeridas e pode ser aumentada ou diminuída só naquele agendamento (botões − e +). O app mostra o horário de término, os espaços livres do dia e **avisa se bater** com outra cliente ou com um bloqueio. |
 | **Detalhes do agendamento** | Mensagens para a cliente com botões **Copiar** e **Abrir no WhatsApp**, além de **Editar** e **Cancelar agendamento**. |
 | **Mensagens** | “Mensagens de hoje”: tudo o que precisa ser enviado no dia (e o que ficou para trás). Marque “Já enviei” para tirar da lista. O número vermelho no ícone mostra quantas faltam. |
@@ -34,6 +34,10 @@ horário ou serviço, as mensagens voltam a aparecer para serem enviadas de novo
 - Aceita qualquer horário de **6h** até **17h30** (último início), de terça a sábado.
 - Se o horário bater com outra cliente ou com um bloqueio, o aviso fica amarelo e, ao salvar, o app pergunta “Agendar mesmo assim?” (para quando a Fabi quiser encaixar alguém).
 - Antes das 6h, depois das 17h30 ou em dia fechado o app não deixa salvar.
+
+### Tempo livre
+O tempo livre de cada dia é contado entre o primeiro horário (6h) e as 18h, descontando atendimentos e bloqueios.
+Na grade, o horário tocado é arredondado para o quarto de hora (ex.: tocar em 10h20 sugere 10h15), sem sair do espaço livre; dá para ajustar no formulário.
 
 ### Duração sugerida
 A duração cadastrada em cada serviço é só uma **sugestão** (ex.: manutenção de unha = 2h). No

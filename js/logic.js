@@ -4,6 +4,7 @@
 export const DEFAULT_SETTINGS = {
   openTime: '06:00',      // primeiro horário (V2: 6h)
   lastStart: '17:30',     // último atendimento começa até este horário
+  dayEnd: '18:00',        // fim do dia na grade e na conta de tempo livre
   workDays: [2, 3, 4, 5, 6], // 0=domingo ... 6=sábado → terça a sábado
   bufferMin: 0,           // intervalo entre uma cliente e outra (minutos)
   templates: {
@@ -90,19 +91,67 @@ function busyIntervals(date, appointments, blocks, excludeId) {
   return busy.sort((x, y) => x.start - y.start);
 }
 
-/** Espaços livres do dia (para mostrar como dica), em minutos: [{start, end}] */
-export function freeIntervals({ date, appointments = [], blocks = [], settings = DEFAULT_SETTINGS, excludeId = null }) {
+/**
+ * Espaços livres do dia, em minutos: [{start, end}].
+ * Sem dayEnd, o último espaço fica aberto (end = null), para a dica do formulário.
+ * Com dayEnd (ex.: 18h), vale para a grade e para a conta de "horas livres".
+ */
+export function freeIntervals({ date, appointments = [], blocks = [], settings = DEFAULT_SETTINGS, excludeId = null, dayEnd = null }) {
   if (!isWorkingDay(date, settings)) return [];
   const open = toMin(settings.openTime);
   const last = toMin(settings.lastStart);
+  const end = dayEnd == null ? null : toMin(dayEnd);
+  const limit = end == null ? last : end;
   const out = [];
   let cursor = open;
   for (const b of busyIntervals(date, appointments, blocks, excludeId)) {
-    if (b.start > cursor && cursor <= last) out.push({ start: cursor, end: b.start });
+    const stop = end == null ? b.start : Math.min(b.start, end);
+    if (stop > cursor && cursor <= limit) out.push({ start: cursor, end: stop });
     cursor = Math.max(cursor, b.end);
   }
-  if (cursor <= last) out.push({ start: cursor, end: null }); // aberto até o fim do dia
+  if (end == null) { if (cursor <= last) out.push({ start: cursor, end: null }); }
+  else if (cursor < end) out.push({ start: cursor, end });
+  return out.filter((g) => g.end == null || g.end > g.start);
+}
+
+/** Total de minutos livres no dia (entre o primeiro horário e o fim do dia) */
+export function freeMinutes(args) {
+  const settings = args.settings || DEFAULT_SETTINGS;
+  return freeIntervals({ ...args, dayEnd: settings.dayEnd || '18:00' }).reduce((n, g) => n + (g.end - g.start), 0);
+}
+/** 180 → "3h livres"; 0 → "lotado" */
+export function fmtFree(min) {
+  return min <= 0 ? 'lotado' : `${fmtDuration(min)} livres`;
+}
+
+/**
+ * Coloca itens que se sobrepõem lado a lado (como o Google Agenda).
+ * Recebe [{start, end, ...}] em minutos e devolve os mesmos com {col, cols}.
+ */
+export function layoutLanes(items) {
+  const sorted = [...items].sort((a, b) => a.start - b.start || b.end - a.end);
+  const out = [];
+  let group = [], groupEnd = -1, lanes = [];
+  const flush = () => { for (const it of group) it.cols = lanes.length; group = []; lanes = []; };
+  for (const it0 of sorted) {
+    const it = { ...it0 };
+    if (it.start >= groupEnd && group.length) flush();
+    let col = lanes.findIndex((endAt) => endAt <= it.start);
+    if (col === -1) { col = lanes.length; lanes.push(it.end); } else lanes[col] = it.end;
+    it.col = col;
+    group.push(it);
+    out.push(it);
+    groupEnd = Math.max(groupEnd, it.end);
+  }
+  flush();
   return out;
+}
+
+/** Horário tocado na grade → início sugerido (arredonda para 15 min, sem sair do espaço livre) */
+export function snapStart(tapMin, gap) {
+  let t = Math.floor(tapMin / 15) * 15;
+  if (t < gap.start) t = gap.start;
+  return t;
 }
 
 /**
