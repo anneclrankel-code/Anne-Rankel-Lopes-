@@ -1,6 +1,6 @@
 // Service worker: deixa o app abrir rápido e instalar na tela inicial.
 // Sempre tenta a versão mais nova pela internet; sem internet, usa a cópia guardada.
-const CACHE = 'fabi-tsunemi-v1';
+const CACHE = 'fabi-tsunemi-v2';
 const SHELL = ['./', 'index.html', 'css/styles.css', 'js/app.js', 'js/logic.js', 'js/db.js', 'js/config.js',
   'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png'];
 

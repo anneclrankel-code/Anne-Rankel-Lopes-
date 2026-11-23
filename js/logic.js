@@ -2,7 +2,7 @@
 // Funções "puras": não mexem na tela nem no banco, por isso são fáceis de testar.
 
 export const DEFAULT_SETTINGS = {
-  openTime: '06:30',      // primeiro horário
+  openTime: '06:00',      // primeiro horário (V2: 6h)
   lastStart: '17:30',     // último atendimento começa até este horário
   workDays: [2, 3, 4, 5, 6], // 0=domingo ... 6=sábado → terça a sábado
   bufferMin: 0,           // intervalo entre uma cliente e outra (minutos)
@@ -81,70 +81,105 @@ function busyIntervals(date, appointments, blocks, excludeId) {
   const busy = [];
   for (const a of appointments) {
     if (a.date !== date || a.status === 'cancelled' || a.id === excludeId) continue;
-    busy.push({ start: toMin(a.start_time), end: toMin(a.end_time) });
+    busy.push({ start: toMin(a.start_time), end: toMin(a.end_time), name: a.client_name });
   }
   for (const b of blocks) {
     if (b.date !== date) continue;
-    busy.push({ start: toMin(b.start_time), end: toMin(b.end_time), isBlock: true });
+    busy.push({ start: toMin(b.start_time), end: toMin(b.end_time), isBlock: true, label: b.label || 'Bloqueio' });
   }
   return busy.sort((x, y) => x.start - y.start);
 }
 
-/**
- * Lista de horários (em minutos) em que o serviço cabe inteiro.
- * Como no protótipo: em cada espaço livre, os horários começam logo depois do
- * atendimento anterior e seguem "encostados" pela duração do serviço — assim a
- * agenda fica sem buracos.
- */
-export function freeSlots({ date, durationMin, appointments = [], blocks = [], settings = DEFAULT_SETTINGS, excludeId = null, nowMin = null }) {
-  if (!isWorkingDay(date, settings) || !durationMin) return [];
+/** Espaços livres do dia (para mostrar como dica), em minutos: [{start, end}] */
+export function freeIntervals({ date, appointments = [], blocks = [], settings = DEFAULT_SETTINGS, excludeId = null }) {
+  if (!isWorkingDay(date, settings)) return [];
   const open = toMin(settings.openTime);
   const last = toMin(settings.lastStart);
-  const buf = Number(settings.bufferMin) || 0;
-  const busy = busyIntervals(date, appointments, blocks, excludeId);
-
-  // monta os espaços livres do dia
-  const gaps = [];
+  const out = [];
   let cursor = open;
-  for (const b of busy) {
-    if (b.start > cursor) gaps.push({ start: cursor, end: b.start - (b.isBlock ? 0 : buf) });
-    // depois de uma cliente, respeita o intervalo; depois de um bloqueio, não precisa
-    cursor = Math.max(cursor, b.end + (b.isBlock ? 0 : buf));
+  for (const b of busyIntervals(date, appointments, blocks, excludeId)) {
+    if (b.start > cursor && cursor <= last) out.push({ start: cursor, end: b.start });
+    cursor = Math.max(cursor, b.end);
   }
-  gaps.push({ start: cursor, end: Infinity });
-
-  const slots = [];
-  for (const g of gaps) {
-    for (let t = g.start; t <= last && t + durationMin <= g.end; t += durationMin + buf) {
-      if (nowMin != null && t < nowMin) continue;
-      slots.push(t);
-    }
-  }
-  return slots;
+  if (cursor <= last) out.push({ start: cursor, end: null }); // aberto até o fim do dia
+  return out;
 }
 
-/** Verifica um horário digitado à mão. Retorna null se estiver livre, ou o motivo. */
-export function checkTime({ date, start, durationMin, appointments = [], blocks = [], settings = DEFAULT_SETTINGS, excludeId = null }) {
-  const s = toMin(start), e = s + durationMin;
-  if (!isWorkingDay(date, settings)) return 'O estúdio não atende neste dia.';
-  if (s < toMin(settings.openTime)) return `O primeiro horário é às ${fmtHour(settings.openTime)}.`;
-  if (s > toMin(settings.lastStart)) return `O último atendimento começa às ${fmtHour(settings.lastStart)}.`;
+/**
+ * Confere um horário de início digitado (como no Google Agenda).
+ * - error: impede salvar (antes das 6h, depois do último horário, dia fechado).
+ * - conflicts: avisos de choque com outra cliente ou bloqueio (a Fabi decide).
+ */
+export function checkStart({ date, start, durationMin, appointments = [], blocks = [], settings = DEFAULT_SETTINGS, excludeId = null }) {
+  const res = { error: null, conflicts: [] };
+  if (!/^\d{1,2}:\d{2}$/.test(String(start || ''))) { res.error = 'Digite o horário de início.'; return res; }
+  const s = toMin(start), e = s + (Number(durationMin) || 0);
+  if (!isWorkingDay(date, settings)) res.error = 'O estúdio não atende neste dia.';
+  else if (s < toMin(settings.openTime)) res.error = `O primeiro horário é às ${fmtHour(settings.openTime)}.`;
+  else if (s > toMin(settings.lastStart)) res.error = `O último atendimento começa às ${fmtHour(settings.lastStart)}.`;
   const buf = Number(settings.bufferMin) || 0;
   for (const b of busyIntervals(date, appointments, blocks, excludeId)) {
     const pad = b.isBlock ? 0 : buf;
     if (s < b.end + pad && e + pad > b.start) {
-      return b.isBlock ? 'Esse horário bate com um bloqueio.' : 'Esse horário bate com outro atendimento.';
+      res.conflicts.push(`${b.isBlock ? `Bloqueio: ${b.label}` : `${b.name}`} (${fmtHour(b.start)} às ${fmtHour(b.end)})`);
     }
   }
-  return null;
+  return res;
+}
+
+/** Converte o que a Fabi digitou ("9", "905", "9h05", "09:05") em "HH:MM" */
+export function parseTyped(v) {
+  const t = String(v || '').trim().toLowerCase().replace(/\s/g, '');
+  let m = t.match(/^(\d{1,2})(?:[:h.]?(\d{2}))?h?$/);
+  if (!m && /^\d{3,4}$/.test(t)) m = [t, t.slice(0, -2), t.slice(-2)];
+  if (!m) return null;
+  const h = Number(m[1]), mi = Number(m[2] || 0);
+  if (h > 23 || mi > 59) return null;
+  return toHHMM(h * 60 + mi);
+}
+
+// ---------- serviços do agendamento (V2: pode ter mais de um) ----------
+export function apptServices(a) {
+  if (Array.isArray(a.services) && a.services.length) return a.services;
+  return [{ id: a.service_id, name: a.service_name, duration_min: a.duration_min, price: a.price }];
+}
+export function joinNames(list) {
+  return list.length <= 1 ? list.join('') : `${list.slice(0, -1).join(', ')} e ${list[list.length - 1]}`;
+}
+
+// ---------- períodos da agenda ----------
+/** Semana de segunda a domingo que contém o dia */
+export function weekRange(s) {
+  const dow = parseDate(s).getDay();
+  const start = addDays(s, dow === 0 ? -6 : 1 - dow);
+  return { start, end: addDays(start, 6) };
+}
+export function monthRange(s) {
+  const d = parseDate(s);
+  const start = dateStr(new Date(d.getFullYear(), d.getMonth(), 1, 12));
+  const end = dateStr(new Date(d.getFullYear(), d.getMonth() + 1, 0, 12));
+  return { start, end };
+}
+const MONTHS = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+export function monthName(s) {
+  const d = parseDate(s);
+  return `${MONTHS[d.getMonth()]} de ${d.getFullYear()}`;
+}
+export function addMonths(s, n) {
+  const d = parseDate(s);
+  const t = new Date(d.getFullYear(), d.getMonth() + n, 1, 12);
+  const lastDay = new Date(t.getFullYear(), t.getMonth() + 1, 0).getDate();
+  t.setDate(Math.min(d.getDate(), lastDay));
+  return dateStr(t);
 }
 
 // ---------- lembretes ----------
 export function fillTemplate(tpl, appt) {
+  const svc = joinNames(apptServices(appt).map((x) => String(x.name || '').toLowerCase()));
   return tpl
     .replaceAll('{nome}', firstName(appt.client_name))
-    .replaceAll('{serviço}', (appt.service_name || '').toLowerCase())
-    .replaceAll('{servico}', (appt.service_name || '').toLowerCase())
+    .replaceAll('{serviço}', svc)
+    .replaceAll('{servico}', svc)
     .replaceAll('{dia}', fmtDayLong(appt.date))
     .replaceAll('{hora}', fmtHourShort(appt.start_time));
 }

@@ -16,8 +16,9 @@ create table if not exists appointments (
   client_name text not null,
   client_phone text,
   service_id uuid references services(id) on delete set null,
-  service_name text not null,        -- guardado junto para o histórico não mudar
-  duration_min integer not null,
+  service_name text not null,        -- guardado junto para o histórico não mudar (ex.: "Mão simples + Pé simples")
+  services jsonb,                    -- V2: lista dos serviços do agendamento
+  duration_min integer not null,     -- duração deste agendamento (pode ser diferente da sugerida)
   price numeric(10,2),               -- valor na data (para o painel financeiro da Etapa 2)
   date date not null,
   start_time text not null,          -- "HH:MM"
@@ -63,7 +64,7 @@ create policy "fabi" on settings for all to authenticated using (true) with chec
 -- Serviços de teste (podem ser editados no app depois)
 insert into services (name, duration_min, color)
 select * from (values
-  ('Manutenção de unha', 165, '#1f3a68'),
+  ('Manutenção de unha', 120, '#1f3a68'),
   ('Pé simples', 40, '#c2577a'),
   ('Mão simples', 40, '#3f8f7a')
 ) v(name, duration_min, color)
