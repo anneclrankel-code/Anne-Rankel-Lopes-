@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Fabi Tsunemi</title>
+  <meta name="description" content="Agenda do estúdio Fabi Tsunemi" />
+  <meta name="theme-color" content="#14284b" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" type="image/png" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Fabi Tsunemi" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <span class="brand-name">Fabi Tsunemi</span>
+      <span class="brand-sub">nail designer</span>
+    </div>
+    <svg class="wave" viewBox="0 0 1440 120" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M0,64 C240,120 480,8 720,48 C960,88 1200,112 1440,40 L1440,120 L0,120 Z" />
+    </svg>
+  </header>
+
+  <div id="banner"></div>
+  <main id="app" aria-live="polite"><p class="muted center pad">Carregando…</p></main>
+
+  <nav class="tabs" id="tabs" hidden>
+    <button data-view="agenda" class="active"><span class="ico">📅</span>Agenda</button>
+    <button data-view="mensagens"><span class="ico">💬</span>Mensagens<span class="badge" id="msg-badge" hidden></span></button>
+    <button data-view="clientes"><span class="ico">🔍</span>Clientes</button>
+    <button data-view="servicos"><span class="ico">💅</span>Serviços</button>
+  </nav>
+
+  <div id="sheet" class="sheet-backdrop" hidden>
+    <section class="sheet" role="dialog" aria-modal="true"><div id="sheet-body"></div></section>
+  </div>
+  <div id="toast" class="toast" hidden></div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
