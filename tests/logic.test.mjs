@@ -90,3 +90,34 @@ test('link do WhatsApp', () => {
   assert.equal(L.whatsappLink('5511912345678', 'a b'), 'https://wa.me/5511912345678?text=a%20b');
   assert.equal(L.whatsappLink('', 'x'), 'https://wa.me/?text=x');
 });
+
+test('V3: tempo livre do dia (6h às 18h) e espaços da grade', () => {
+  const appointments = [appt('ana', '06:00', 120), appt('bia', '09:15', 40)];
+  const blocks = [{ date: TUE, start_time: '12:00', end_time: '13:00' }];
+  // 12h de dia - 2h - 40min - 1h = 8h20
+  assert.equal(L.freeMinutes({ date: TUE, appointments, blocks }), 500);
+  assert.equal(L.fmtFree(500), '8h20 livres');
+  assert.equal(L.fmtFree(0), 'lotado');
+  assert.equal(L.freeMinutes({ date: '2026-11-23' }), 0); // segunda: fechado
+  const g = L.freeIntervals({ date: TUE, appointments, blocks, dayEnd: '18:00' }).map((x) => [L.fmtHour(x.start), L.fmtHour(x.end)]);
+  assert.deepEqual(g, [['8h00', '9h15'], ['9h55', '12h00'], ['13h00', '18h00']]);
+  // atendimento que passa das 18h não gera espaço negativo
+  const late = [appt('z', '17:30', 120)];
+  assert.equal(L.freeMinutes({ date: TUE, appointments: late }), 690);
+});
+
+test('V3: itens sobrepostos ficam lado a lado', () => {
+  const out = L.layoutLanes([
+    { id: 'a', start: 360, end: 480 },
+    { id: 'b', start: 420, end: 460 },
+    { id: 'c', start: 470, end: 500 },
+    { id: 'd', start: 600, end: 640 },
+  ]);
+  const by = Object.fromEntries(out.map((x) => [x.id, [x.col, x.cols]]));
+  assert.deepEqual(by, { a: [0, 2], b: [1, 2], c: [1, 2], d: [0, 1] });
+});
+
+test('V3: toque num horário livre vira início arredondado', () => {
+  assert.equal(L.snapStart(600 + 7, { start: 595, end: 720 }), 600);   // 10h07 → 10h00
+  assert.equal(L.snapStart(597, { start: 595, end: 720 }), 595);       // 9h57 → 9h55 (início do espaço)
+});

@@ -125,62 +125,50 @@ function render() {
   ({ agenda: renderAgenda, mensagens: renderMessages, clientes: renderClients, servicos: renderServices })[S.view]();
 }
 
-// ---------------- AGENDA ----------------
+// ---------------- AGENDA (calendário: dia, semana, mês) ----------------
 const RANGES = { dia: 'Dia', semana: 'Semana', mes: 'Mês' };
+const PX = 64 / 60; // 64 pixels por hora na grade
+const WEEK_SHORT = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
 
 function itemsOn(d) {
   return [
-    ...liveAppts().filter((a) => a.date === d).map((a) => ({ kind: 'a', start: a.start_time, a })),
-    ...S.blocks.filter((b) => b.date === d).map((b) => ({ kind: 'b', start: b.start_time, b })),
-  ].sort((x, y) => x.start.localeCompare(y.start));
+    ...liveAppts().filter((a) => a.date === d).map((a) => ({ kind: 'a', start: L.toMin(a.start_time), end: L.toMin(a.end_time), a })),
+    ...S.blocks.filter((b) => b.date === d).map((b) => ({ kind: 'b', start: L.toMin(b.start_time), end: L.toMin(b.end_time), b })),
+  ].sort((x, y) => x.start - y.start);
 }
+const busyArgs = (date) => ({ date, appointments: S.appointments, blocks: S.blocks, settings: S.settings });
+const freeOf = (date) => L.freeMinutes(busyArgs(date));
 
-function periodDays() {
-  if (S.range === 'dia') return [S.day];
-  const { start, end } = S.range === 'semana' ? L.weekRange(S.day) : L.monthRange(S.day);
-  const days = [];
-  for (let d = start; d <= end; d = L.addDays(d, 1)) days.push(d);
-  return days;
+/** Dias mostrados na semana: os dias de atendimento + qualquer dia com algo marcado */
+function weekDays() {
+  const { start } = L.weekRange(S.day);
+  const all = Array.from({ length: 7 }, (_, i) => L.addDays(start, i));
+  return all.filter((d) => L.isWorkingDay(d, S.settings) || itemsOn(d).length);
 }
 
 function renderAgenda() {
   const d = S.day;
-  const working = L.isWorkingDay(d, S.settings);
-  const days = periodDays();
-  let title, sub;
+  let title, sub = '';
   if (S.range === 'dia') {
     title = L.weekdayName(d);
-    sub = `${L.ddmm(d)} · ${working ? `${L.fmtHour(S.settings.openTime)} às ${L.fmtHour(S.settings.lastStart)}` : 'estúdio fechado'}`;
+    sub = L.ddmm(d) + (L.isWorkingDay(d, S.settings) ? (d >= today() ? ` · ${L.fmtFree(freeOf(d))}` : '') : ' · estúdio fechado');
   } else if (S.range === 'semana') {
+    const { start, end } = L.weekRange(d);
     title = 'Semana';
-    sub = `${L.ddmm(days[0])} a ${L.ddmm(days[days.length - 1])}`;
+    sub = `${L.ddmm(start)} a ${L.ddmm(end)}`;
   } else {
     title = L.monthName(d);
-    sub = '';
   }
-  const total = days.reduce((n, x) => n + itemsOn(x).filter((i) => i.kind === 'a').length, 0);
-  if (S.range !== 'dia') sub += `${sub ? ' · ' : ''}${total} atendimento${total === 1 ? '' : 's'}`;
-  const showToday = S.range === 'dia' ? d !== today() : !days.includes(today());
+  const inPeriod = S.range === 'dia' ? d === today()
+    : S.range === 'semana' ? L.weekRange(d).start === L.weekRange(today()).start
+    : d.slice(0, 7) === today().slice(0, 7);
 
-  let listHtml;
-  if (S.range === 'dia') {
-    const items = itemsOn(d);
-    listHtml = items.length ? items.map(itemCard).join('') : `<div class="empty">${working ? 'Nenhum atendimento neste dia.' : 'O estúdio não atende neste dia.'}</div>`;
-  } else {
-    // semana: mostra todos os dias de atendimento; mês: só os dias com algo marcado
-    const shown = days.filter((x) => itemsOn(x).length || (S.range === 'semana' && L.isWorkingDay(x, S.settings)));
-    listHtml = shown.length
-      ? shown.map((x) => {
-          const items = itemsOn(x);
-          return `<button class="day-head ${x === today() ? 'is-today' : ''}" data-act="goday" data-day="${x}">
-              <span>${esc(L.weekdayName(x))}, ${L.ddmm(x)}${x === today() ? ' · hoje' : ''}</span><span class="muted">ver dia ›</span></button>
-            ${items.length ? items.map(itemCard).join('') : '<div class="card free">Livre</div>'}`;
-        }).join('')
-      : '<div class="empty">Nada marcado neste mês.</div>';
-  }
+  let body;
+  if (S.range === 'mes') body = monthGrid();
+  else body = timeGrid(S.range === 'dia' ? [d] : weekDays());
 
   app.innerHTML = `
-    <div class="seg" role="tablist" aria-label="Período">
+    <div class="seg" role="tablist" aria-label="Visão da agenda">
       ${Object.entries(RANGES).map(([k, v]) => `<button role="tab" aria-selected="${S.range === k}" class="${S.range === k ? 'on' : ''}" data-range="${k}">${v}</button>`).join('')}
     </div>
     <div class="day-nav">
@@ -188,23 +176,32 @@ function renderAgenda() {
       <div class="day-title">
         <label>
           <strong>${esc(title)}</strong>
-          <span>${sub}</span>
+          ${sub ? `<span>${esc(sub)}</span>` : ''}
           <input type="date" id="pick-day" value="${d}">
         </label>
-        ${showToday ? '<br><button class="today-link" data-act="today">Voltar para hoje</button>' : ''}
+        ${!inPeriod ? '<br><button class="today-link" data-act="today">Voltar para hoje</button>' : ''}
       </div>
       <button class="icon-btn" data-act="next" aria-label="Próximo">›</button>
     </div>
-    <div class="list">${listHtml}</div>
-    <div class="actions-bottom">
-      <button class="btn primary" data-act="new">+ Agendar</button>
-      <button class="btn" data-act="block">Bloquear horário</button>
-    </div>`;
+    <div class="cal-tools">
+      <button class="btn primary small" data-act="new">+ Agendar</button>
+      <button class="btn small" data-act="block">Bloquear horário</button>
+    </div>
+    ${body}
+    ${S.range !== 'mes' ? '<p class="hint center">Toque num espaço verde (livre) para agendar naquele horário.</p>' : '<p class="hint center"><span class="legend-free">7h40</span> = tempo livre no dia · toque num dia para ver a agenda dele.</p>'}`;
 
   const step = (n) => (S.range === 'dia' ? L.addDays(S.day, n) : S.range === 'semana' ? L.addDays(S.day, 7 * n) : L.addMonths(S.day, n));
   app.onclick = (e) => {
     const r = e.target.closest('[data-range]');
     if (r) { S.range = r.dataset.range; try { localStorage.setItem('fabi-range', S.range); } catch {} render(); return; }
+    const free = e.target.closest('[data-free]');
+    if (free) {
+      const [date, gs, ge] = free.dataset.free.split('|');
+      const y = e.clientY - free.getBoundingClientRect().top;
+      const t = L.snapStart(Number(gs) + y / PX, { start: Number(gs), end: Number(ge) });
+      openApptForm({ date, start_time: L.toHHMM(Math.min(t, L.toMin(S.settings.lastStart))) });
+      return;
+    }
     const t = e.target.closest('[data-act]');
     if (!t) return;
     const act = t.dataset.act;
@@ -222,25 +219,101 @@ function renderAgenda() {
   $('.day-title label').onclick = (e) => { if (e.target !== pick) { e.preventDefault(); pick.showPicker?.() ?? pick.click(); } };
 }
 
+// ----- grade de horários (dia e semana) -----
+function timeGrid(days) {
+  const all = days.flatMap(itemsOn);
+  const gStart = Math.floor(Math.min(L.toMin(S.settings.openTime), ...all.map((i) => i.start)) / 60) * 60;
+  const gEnd = Math.ceil(Math.max(L.toMin(S.settings.dayEnd || '18:00'), ...all.map((i) => i.end)) / 60) * 60;
+  const height = (gEnd - gStart) * PX;
+  const y = (min) => (min - gStart) * PX;
+  const week = days.length > 1;
+  const nowM = nowMin();
+
+  const hours = [];
+  for (let h = gStart; h <= gEnd; h += 60) hours.push(`<span style="top:${y(h)}px">${h / 60}h</span>`);
+
+  const cols = days.map((d) => {
+    const isPast = d < today();
+    const working = L.isWorkingDay(d, S.settings);
+    // horários livres (verde, tocáveis) — só de agora em diante
+    const frees = isPast ? [] : L.freeIntervals({ ...busyArgs(d), dayEnd: L.toHHMM(gEnd) })
+      .map((g) => {
+        let s = g.start;
+        if (d === today()) s = Math.max(s, Math.ceil(nowM / 5) * 5);
+        const e = Math.min(g.end, gEnd);
+        const startCap = Math.min(e, L.toMin(S.settings.lastStart) + 30); // depois do último início não dá para agendar
+        return { start: s, end: startCap, realEnd: e };
+      })
+      .filter((g) => g.end - g.start >= 10);
+    const freeHtml = frees.map((g) => {
+      const h = (g.end - g.start) * PX;
+      const label = h >= 22 ? `<span>${week ? L.fmtDuration(g.realEnd - g.start) : `livre · ${L.fmtHour(g.start)} às ${L.fmtHour(g.realEnd)} (${L.fmtDuration(g.realEnd - g.start)})`}</span>` : '';
+      return `<button class="cal-free" style="top:${y(g.start)}px;height:${h}px" data-free="${d}|${g.start}|${g.end}" aria-label="Livre das ${L.fmtHour(g.start)} às ${L.fmtHour(g.realEnd)}. Toque para agendar">${label}</button>`;
+    }).join('');
+
+    const evHtml = L.layoutLanes(itemsOn(d)).map((it) => {
+      const top = y(it.start), h = Math.max((it.end - it.start) * PX, 18);
+      const pos = `top:${top}px;height:${h}px;left:calc(${(it.col / it.cols) * 100}% + 2px);width:calc(${100 / it.cols}% - 4px)`;
+      const time = `${L.fmtHour(it.start)}–${L.fmtHour(it.end)}`;
+      if (it.kind === 'b') {
+        return `<button class="cal-ev block" style="${pos}" data-act="blk" data-id="${it.b.id}">
+          <b>${esc(it.b.label || 'Bloqueio')}</b>${h >= 34 ? `<small>${time}</small>` : ''}</button>`;
+      }
+      const a = it.a;
+      const color = serviceById(L.apptServices(a)[0].id)?.color || '#9aa3b5';
+      return `<button class="cal-ev" style="${pos};--c:${esc(color)}" data-act="appt" data-id="${a.id}">
+        <b>${esc(a.client_name)}</b>${h >= 34 ? `<small>${week ? L.fmtHour(it.start) : `${time} · ${esc(a.service_name)}`}</small>` : ''}</button>`;
+    }).join('');
+
+    const nowLine = d === today() && nowM >= gStart && nowM <= gEnd ? `<div class="cal-now" style="top:${y(nowM)}px"></div>` : '';
+    return `<div class="cal-col ${working ? '' : 'closed'} ${isPast ? 'past' : ''}">${freeHtml}${evHtml}${nowLine}</div>`;
+  }).join('');
+
+  const head = week ? `<div class="cal-head"><span></span>${days.map((d) => `
+      <button class="cal-dh ${d === today() ? 'is-today' : ''}" data-act="goday" data-day="${d}">
+        <small>${WEEK_SHORT[L.parseDate(d).getDay()]}</small><b>${Number(d.slice(8))}</b>
+        ${L.isWorkingDay(d, S.settings) && d >= today() ? `<em>${esc(L.fmtFree(freeOf(d)).replace(' livres', ''))}</em>` : '<em>&nbsp;</em>'}
+      </button>`).join('')}</div>` : '';
+
+  return `<div class="cal ${week ? 'week' : 'day'}" style="--n:${days.length}">
+    ${head}
+    <div class="cal-body" style="height:${height}px">
+      <div class="cal-times">${hours.join('')}</div>
+      <div class="cal-cols" style="background-position:0 ${-((gStart % 60) * PX)}px">${cols}</div>
+    </div>
+  </div>`;
+}
+
+// ----- grade do mês -----
+function monthGrid() {
+  const { start, end } = L.monthRange(S.day);
+  const first = L.weekRange(start).start;
+  const last = L.weekRange(end).end;
+  const cells = [];
+  for (let d = first; d <= last; d = L.addDays(d, 1)) {
+    const out = d < start || d > end;
+    const items = itemsOn(d);
+    const working = L.isWorkingDay(d, S.settings);
+    const lines = items.slice(0, 3).map((it) => it.kind === 'b'
+      ? `<i class="mb">${L.fmtHourShort(it.start)} ${esc(it.b.label || 'Bloqueio')}</i>`
+      : `<i style="--c:${esc(serviceById(L.apptServices(it.a)[0].id)?.color || '#9aa3b5')}">${L.fmtHourShort(it.start)} ${esc(it.a.client_name.split(' ')[0])}</i>`).join('');
+    const more = items.length > 3 ? `<i class="more">+${items.length - 3}</i>` : '';
+    const fm = working && d >= today() ? freeOf(d) : null;
+    const free = fm == null ? '' : `<em class="${fm <= 0 ? 'full' : ''}">${fm <= 0 ? 'lotado' : L.fmtDuration(fm)}</em>`;
+    cells.push(`<button class="mc ${out ? 'out' : ''} ${working ? '' : 'closed'} ${d === today() ? 'is-today' : ''}" data-act="goday" data-day="${d}" aria-label="${esc(L.weekdayName(d))}, ${L.ddmm(d)}: ${items.filter((i) => i.kind === 'a').length} atendimentos${fm != null ? ', ' + L.fmtFree(fm) : ''}">
+      <span class="mn">${Number(d.slice(8))}</span>${lines}${more}${free}</button>`);
+  }
+  return `<div class="month">
+    <div class="mh">${['seg', 'ter', 'qua', 'qui', 'sex', 'sáb', 'dom'].map((x) => `<span>${x}</span>`).join('')}</div>
+    <div class="mg">${cells.join('')}</div>
+  </div>`;
+}
+
 function barStyle(a) {
   const cols = L.apptServices(a).map((x) => serviceById(x.id)?.color || '#9aa3b5');
   if (cols.length === 1) return `background:${esc(cols[0])}`;
   const step = 100 / cols.length;
   return `background:linear-gradient(${cols.map((c, i) => `${esc(c)} ${i * step}% ${(i + 1) * step}%`).join(',')})`;
-}
-
-function itemCard(it) {
-  if (it.kind === 'b') {
-    const b = it.b;
-    return `<button class="card block" data-act="blk" data-id="${b.id}">
-      <div class="body"><div class="title">${esc(b.label || 'Bloqueio')} (bloqueio manual)</div>
-      <div class="sub">${L.fmtHour(b.start_time)} às ${L.fmtHour(b.end_time)}</div></div></button>`;
-  }
-  const a = it.a;
-  return `<button class="card" data-act="appt" data-id="${a.id}">
-    <span class="bar" style="${barStyle(a)}"></span>
-    <div class="body"><div class="title">${esc(a.client_name)} · ${esc(a.service_name)}</div>
-    <div class="sub">${L.fmtHour(a.start_time)} às ${L.fmtHour(a.end_time)} (${L.fmtDuration(a.duration_min)})</div></div></button>`;
 }
 
 // ---------------- janela (sheet) ----------------
@@ -303,7 +376,7 @@ function openApptForm(init) {
       </div>
       <div class="row2">
         <label class="field"><span>Data</span><input class="input" type="date" name="date" value="${f.date}" required></label>
-        <label class="field"><span>Início</span><input class="input" name="start" inputmode="numeric" placeholder="ex.: 9:05" value="${editing ? esc(init.start_time) : ''}" required></label>
+        <label class="field"><span>Início</span><input class="input" name="start" inputmode="numeric" placeholder="ex.: 9:05" value="${esc(init.start_time || '')}" required></label>
       </div>
       <div id="time-info"></div>
       <p class="error" id="form-error" hidden></p>
