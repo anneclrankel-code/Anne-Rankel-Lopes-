@@ -3,7 +3,7 @@
 App de agenda do estúdio da Fabi, nail designer. Funciona no navegador do celular e pode ser
 instalado na tela inicial como se fosse um aplicativo (é o que se chama de **PWA**).
 
-Esta é a **Etapa 1 (Agendamento)**. O painel financeiro (Etapa 2) e o agendamento por áudio
+Esta é a **Etapa 1 (Agendamento), versão 2**. O painel financeiro (Etapa 2) e o agendamento por áudio
 ficam para versões futuras.
 
 ---
@@ -12,8 +12,8 @@ ficam para versões futuras.
 
 | Tela | O que tem |
 |---|---|
-| **Agenda** | Agenda do dia em lista (atendimentos e bloqueios), setas para trocar de dia, toque no nome do dia para abrir o calendário. Botões **+ Agendar** e **Bloquear horário** (ex.: almoço). |
-| **Novo agendamento** | Nome da cliente, telefone, serviço, data. O app mostra **só os horários vagos em que o serviço cabe inteiro**, sem bater com outras clientes nem com bloqueios. O horário de término é calculado sozinho. Se precisar, dá para digitar “outro horário” (o app avisa se tiver conflito). |
+| **Agenda** | Filtro **Dia / Semana / Mês**, sempre com atendimentos e bloqueios. Setas para avançar ou voltar (um dia, uma semana ou um mês), toque no título para abrir o calendário e em “ver dia ›” para abrir aquele dia. Botões **+ Agendar** e **Bloquear horário** (ex.: almoço). |
+| **Novo agendamento** | Nome da cliente, telefone, **um ou mais serviços**, data e **horário de início digitado** (como no Google Agenda, aceita minutos quebrados: `9:05`, `905` ou `9h05`). A duração vem preenchida com a soma das durações sugeridas e pode ser aumentada ou diminuída só naquele agendamento (botões − e +). O app mostra o horário de término, os espaços livres do dia e **avisa se bater** com outra cliente ou com um bloqueio. |
 | **Detalhes do agendamento** | Mensagens para a cliente com botões **Copiar** e **Abrir no WhatsApp**, além de **Editar** e **Cancelar agendamento**. |
 | **Mensagens** | “Mensagens de hoje”: tudo o que precisa ser enviado no dia (e o que ficou para trás). Marque “Já enviei” para tirar da lista. O número vermelho no ícone mostra quantas faltam. |
 | **Clientes** | Busca pelo nome, telefone, histórico e botão para agendar de novo. |
@@ -30,13 +30,17 @@ Nada é enviado sozinho (sem custo): a Fabi toca em **Abrir no WhatsApp** (já a
 cliente com o texto pronto) ou em **Copiar** e cola onde quiser. Se um agendamento mudar de dia,
 horário ou serviço, as mensagens voltam a aparecer para serem enviadas de novo.
 
-### Como o app escolhe os horários vagos
-Os horários aparecem “encostados”: logo depois de cada atendimento ou bloqueio, um atrás do
-outro, pela duração do serviço — assim a agenda não fica com buracos. Exemplo (igual ao
-protótipo): com Ana 6h30–9h15, Bia 9h15–9h55, almoço 12h–13h e Carla 14h–14h40, para uma
-**mão simples (40 min)** o app oferece 9h55, 10h35, 11h15, 13h00, 14h40, 15h20, 16h00, 16h40 e 17h20.
+### Horário de início e conflitos
+- Aceita qualquer horário de **6h** até **17h30** (último início), de terça a sábado.
+- Se o horário bater com outra cliente ou com um bloqueio, o aviso fica amarelo e, ao salvar, o app pergunta “Agendar mesmo assim?” (para quando a Fabi quiser encaixar alguém).
+- Antes das 6h, depois das 17h30 ou em dia fechado o app não deixa salvar.
 
-Regras atuais (dá para mudar em **Serviços → Ajustes**): terça a sábado, primeiro horário 6h30,
+### Duração sugerida
+A duração cadastrada em cada serviço é só uma **sugestão** (ex.: manutenção de unha = 2h). No
+agendamento ela pode ser ajustada sem mudar o cadastro. Com mais de um serviço, a sugestão é a soma.
+Agendamentos já marcados mantêm a duração com que foram marcados.
+
+Regras atuais (dá para mudar em **Serviços → Ajustes**): terça a sábado, primeiro horário 6h,
 último atendimento começando até 17h30, sem intervalo entre clientes.
 
 ---
@@ -65,6 +69,8 @@ mais do que suficiente para um estúdio.
 3. **Criar as tabelas:** no menu da esquerda, abra **SQL Editor** → **New query**. Abra o arquivo
    [`supabase/schema.sql`](supabase/schema.sql) deste projeto, copie todo o texto, cole lá e clique em **Run**.
    Deve aparecer “Success”. Isso cria as tabelas e os 3 serviços de teste.
+   > **Já tinha feito isso na V1?** Então rode também o arquivo [`supabase/migracao-v2.sql`](supabase/migracao-v2.sql)
+   > (mesmo caminho: SQL Editor → New query → colar → Run). Ele adiciona o campo para vários serviços por agendamento.
 4. **Deixar o login só para a Fabi:**
    - Vá em **Authentication** → **Sign In / Providers** (ou **Providers**) e **desligue** a opção
      **Allow new users to sign up**. Assim ninguém mais consegue criar conta.
@@ -123,7 +129,7 @@ Pronto: aparece o ícone “Fabi Tsunemi” na tela, e o app abre em tela cheia.
 - Sem etapa de build: HTML, CSS e JavaScript puros (módulos ES).
   - `index.html` — estrutura da página
   - `css/styles.css` — visual (azul marinho + off-white, cantos arredondados)
-  - `js/logic.js` — regras: horários vagos, conflitos, régua de lembretes, WhatsApp
+  - `js/logic.js` — regras: conferência do horário, conflitos, semana/mês, régua de lembretes, WhatsApp
   - `js/db.js` — banco de dados (Supabase, ou o navegador no modo de teste)
   - `js/app.js` — telas
   - `js/config.js` — endereço e chave do Supabase
@@ -131,11 +137,12 @@ Pronto: aparece o ícone “Fabi Tsunemi” na tela, e o app abre em tela cheia.
   - `supabase/schema.sql` — tabelas e regras de segurança
 - Rodar no computador: `python3 -m http.server 8080` (ou `npm start`) e abrir `http://localhost:8080`.
 - Testes das regras: `npm test` (precisa do Node.js 20+).
-- Ao mudar arquivos do app, troque o nome do cache em `sw.js` (`fabi-tsunemi-v1` → `v2`) para os
+- Ao mudar arquivos do app, troque o nome do cache em `sw.js` (ex.: `fabi-tsunemi-v2` → `v3`) para os
   celulares pegarem a versão nova mais rápido.
 
 ## Perguntas em aberto (da especificação)
 - **Valor de cada serviço:** já dá para cadastrar em *Serviços*; o valor fica gravado em cada agendamento para o painel financeiro da Etapa 2.
+- **Lista completa de serviços:** cadastrar em *Serviços* (nome, duração sugerida, valor e cor) — ou direto na tabela `services` do Supabase.
 - **Intervalo entre clientes:** ajustável em *Serviços → Ajustes* (hoje está em 0 min).
 - **Horário de atendimento:** provisório, também ajustável em *Ajustes*.
 

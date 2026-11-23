@@ -183,3 +183,30 @@ textarea.input { min-height: 96px; resize: vertical; }
 .service-row { display: flex; align-items: center; gap: 12px; }
 .service-row .dot { width: 14px; height: 14px; border-radius: 50%; flex: none; }
 hr { border: 0; border-top: 1px solid var(--line); margin: 24px 0; }
+
+/* ---------- V2: filtro dia/semana/mês ---------- */
+.seg { display: flex; background: var(--navy-soft); border-radius: 999px; padding: 4px; margin: 6px 0 8px; }
+.seg button { flex: 1; border: 0; background: none; border-radius: 999px; padding: 8px 0; font-weight: 600; color: var(--navy); cursor: pointer; min-height: 40px; }
+.seg button.on { background: var(--navy); color: var(--bg); }
+.day-head {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 8px; width: 100%;
+  border: 0; background: none; padding: 10px 2px 0; cursor: pointer; text-align: left;
+  font-weight: 700; color: var(--navy); font-size: 15px;
+}
+.day-head span:first-child::first-letter { text-transform: uppercase; }
+.day-head .muted { font-weight: 400; font-size: 13px; }
+.day-head.is-today span:first-child { text-decoration: underline; text-underline-offset: 4px; }
+
+/* ---------- V2: duração e horário livre ---------- */
+.dur { display: flex; align-items: center; gap: 10px; }
+.dur-inputs { flex: 1; }
+.dur-inputs label { position: relative; display: block; }
+.dur-inputs small { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+.dur-inputs .input { padding-right: 58px; text-align: center; }
+.chip small { font-size: 12px; }
+.link { border: 0; background: none; padding: 0; color: var(--navy-2); text-decoration: underline; cursor: pointer; font-size: inherit; }
+.time-result { border-radius: var(--radius-sm); padding: 10px 14px; margin: 4px 0 10px; font-size: 15px; }
+.time-result.ok { background: #e3f2ea; color: #1d5a40; }
+.time-result.warn { background: #fff4dc; color: #6b4e12; }
+.time-result.bad { background: #f9e3e1; color: var(--danger); }
+.time-result div { font-size: 14px; margin-top: 4px; }
