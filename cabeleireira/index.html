@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="pt-BR" data-font="grande">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Salão em Casa</title>
+  <meta name="description" content="Contas e recebimentos dos atendimentos" />
+  <meta name="theme-color" content="#0b4fb3" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" type="image/png" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Salão" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <nav class="tabs" id="tabs" role="tablist">
+    <button data-tab="atender" class="on" role="tab">Atender</button>
+    <button data-tab="receber" role="tab">A receber <span id="badge" class="badge" hidden></span></button>
+  </nav>
+  <main id="app" aria-live="polite"><p class="center muted">Abrindo…</p></main>
+  <div id="toast" class="toast" role="status" hidden></div>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
