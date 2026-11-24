@@ -3,6 +3,9 @@
 App de agenda do estúdio da Fabi, nail designer. Funciona no navegador do celular e pode ser
 instalado na tela inicial como se fosse um aplicativo (é o que se chama de **PWA**).
 
+> 💇‍♀️ Este repositório também tem o app **Salão em Casa** (contas e recebimentos da cabeleireira),
+> na pasta [`cabeleireira/`](cabeleireira/README.md).
+
 Esta é a **Etapa 1 (Agendamento), versão 3**. O painel financeiro (Etapa 2) e o agendamento por áudio
 ficam para versões futuras.
 
