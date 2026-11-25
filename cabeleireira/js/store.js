@@ -2,19 +2,20 @@
 // Se o navegador não deixar usar o IndexedDB, guarda só na memória (e avisa).
 
 const NAME = 'salao-em-casa';
-const STORES = ['services', 'visits', 'meta'];
+const STORES = ['services', 'visits', 'meta', 'types', 'subtypes', 'products']; // V2: tipos, subtipos e produtos
+const CATALOG = ['types', 'subtypes', 'products'];
 let db = null;
-const mem = { services: new Map(), visits: new Map(), meta: new Map() };
+const mem = Object.fromEntries(STORES.map((s) => [s, new Map()]));
 export let memoryOnly = false;
 
 export function open() {
   return new Promise((resolve) => {
     let req;
-    try { req = indexedDB.open(NAME, 1); } catch { memoryOnly = true; return resolve(); }
+    try { req = indexedDB.open(NAME, 2); } catch { memoryOnly = true; return resolve(); }
     req.onupgradeneeded = () => {
       for (const s of STORES) if (!req.result.objectStoreNames.contains(s)) req.result.createObjectStore(s, { keyPath: s === 'meta' ? 'key' : 'id' });
     };
-    req.onsuccess = () => { db = req.result; resolve(); };
+    req.onsuccess = () => { db = req.result; db.onversionchange = () => db.close(); resolve(); };
     req.onerror = () => { memoryOnly = true; resolve(); };
     req.onblocked = () => { memoryOnly = true; resolve(); };
   });
@@ -53,18 +54,20 @@ export async function getMeta(key) {
 
 export const setMeta = (key, value) => put('meta', { key, value });
 
-/** Troca todos os serviços e atendimentos de uma vez (restaurar cópia). */
-export async function replaceAll({ services, visits }) {
+/** Troca os dados de uma vez (restaurar cópia). Só troca as tabelas que vierem na cópia. */
+export async function replaceAll(data) {
+  const names = ['services', 'visits', ...CATALOG].filter((n) => Array.isArray(data[n]));
   if (!db) {
-    mem.services = new Map(services.map((s) => [s.id, s]));
-    mem.visits = new Map(visits.map((v) => [v.id, v]));
+    for (const n of names) mem[n] = new Map(data[n].map((x) => [x.id, x]));
     return;
   }
   await new Promise((resolve, reject) => {
-    const tx = db.transaction(['services', 'visits'], 'readwrite');
-    const ss = tx.objectStore('services'); const vs = tx.objectStore('visits');
-    ss.clear(); vs.clear();
-    services.forEach((s) => ss.put(s)); visits.forEach((v) => vs.put(v));
+    const tx = db.transaction(names, 'readwrite');
+    for (const n of names) {
+      const st = tx.objectStore(n);
+      st.clear();
+      data[n].forEach((x) => st.put(x));
+    }
     tx.oncomplete = resolve; tx.onerror = () => reject(tx.error); tx.onabort = () => reject(tx.error);
   });
 }

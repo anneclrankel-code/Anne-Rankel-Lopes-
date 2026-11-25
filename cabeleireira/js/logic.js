@@ -27,6 +27,58 @@ export const DEFAULT_SERVICES = [
   ['Maquiagem', 'Penteado', 12000],
 ].map(([category, name, price], i) => ({ id: `s${i + 1}`, category, name, price, order: i }));
 
+// ---------- V2: tipos, subtipos e produtos (lista inicial; ela muda tudo no app) ----------
+const SUGGESTED_CATALOG = [
+  ['Química', [['Água oxigenada', ['Volume']], ['Tintura', ['Cor']], ['Descolorante'], ['Permanente']]],
+  ['Alisamento', [['Progressiva'], ['Selagem'], ['Botox capilar'], ['Relaxamento']]],
+  ['Tratamento', [['Máscara'], ['Ampola'], ['Reconstrução'], ['Óleo capilar']]],
+  ['Tonalização', [['Tonalizante', ['Cor']], ['Matizador']]],
+  ['Unha', [['Esmalte', ['Cor']], ['Base'], ['Extra brilho'], ['Removedor'], ['Gel']]],
+  ['Maquiagem', [['Base', ['Cor']], ['Corretivo'], ['Pó'], ['Sombra'], ['Batom', ['Cor']], ['Máscara de cílios']]],
+  ['Podologia', [['Antisséptico'], ['Creme hidratante'], ['Lixa descartável']]],
+  ['Sobrancelha', [['Henna', ['Cor']], ['Cera'], ['Linha'], ['Tintura para sobrancelha', ['Cor']]]],
+  ['Mega hair', [['Mechas de cabelo', ['Comprimento']], ['Queratina'], ['Fita adesiva'], ['Microlink']]],
+];
+
+export function defaultCatalog() {
+  const types = []; const subtypes = [];
+  SUGGESTED_CATALOG.forEach(([name, subs], i) => {
+    const typeId = `t${i + 1}`;
+    types.push({ id: typeId, name, order: i });
+    subs.forEach(([sub, fields = []], j) => subtypes.push({ id: `${typeId}-${j + 1}`, typeId, name: sub, fields, order: j }));
+  });
+  return { types, subtypes, products: [] };
+}
+
+export const UNITS = ['ml', 'g'];
+
+/** Quanto custou a quantidade gasta de um produto (centavos). */
+export function usageCost(product, qty) {
+  const pack = Number(product?.packQty) || 0;
+  const q = Number(qty) || 0;
+  if (pack <= 0 || q <= 0) return 0;
+  return Math.round((Number(product.cost) || 0) * q / pack);
+}
+
+/** "2,5" → 2.5 · "30" → 30. null se não for número maior que zero. */
+export function parseQty(text) {
+  const s = String(text ?? '').trim().replace(/\s/g, '').replace(',', '.');
+  if (!/^\d+(\.\d+)?$/.test(s)) return null;
+  const n = parseFloat(s);
+  return n > 0 ? n : null;
+}
+
+export const fmtQty = (n) => String(Math.round((Number(n) || 0) * 100) / 100).replace('.', ',');
+
+export const productsCost = (usage) => (usage || []).reduce((a, u) => a + (Number(u.cost) || 0), 0);
+export const assistantCost = (v) => (v.hadAssistant ? Math.max(0, Number(v.assistant) || 0) : 0);
+
+/** Lucro do atendimento: total da cliente − assistente − produtos usados. */
+export const visitProfit = (v) => visitTotal(v) - assistantCost(v) - productsCost(v.usage);
+
+/** Características do produto em texto curto: "Volume 20 · Cor 7.1". */
+export const traitsText = (traits) => (traits || []).filter((t) => t.name && t.value).map((t) => `${t.name} ${t.value}`).join(' · ');
+
 const BRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 export const money = (cents) => BRL.format((Number(cents) || 0) / 100);
 
@@ -49,7 +101,7 @@ export function changeAdjust(items, adjust, delta) {
   return Math.max(-subtotal(items), next);
 }
 
-export const visitTotal = (v) => total(v.items, v.adjust);
+export function visitTotal(v) { return total(v.items, v.adjust); }
 
 export function normalizeName(s) {
   return String(s || '').replace(/\s+/g, ' ').trim();
@@ -134,7 +186,12 @@ export function needsBackup(visits, lastSync, lastExport, now = new Date()) {
 }
 
 export function snapshot(services, visits, now = new Date()) {
-  return { app: 'salao-em-casa', version: 1, exportedAt: now.toISOString(), services, visits };
+  return { app: 'salao-em-casa', version: 2, exportedAt: now.toISOString(), services, visits };
+}
+
+/** Cópia completa (V2): serviços, atendimentos e o cadastro de produtos. */
+export function fullSnapshot(data, now = new Date()) {
+  return { ...snapshot(data.services, data.visits, now), types: data.types, subtypes: data.subtypes, products: data.products };
 }
 
 /** Confere e arruma uma cópia de segurança (arquivo ou planilha). Lança erro se não servir. */
@@ -158,8 +215,53 @@ export function validateBackup(obj) {
       method: v.paid && METHODS.some((m) => m.id === v.method) ? v.method : null,
       paidAt: v.paid && v.paidAt && !isNaN(new Date(v.paidAt)) ? new Date(v.paidAt).toISOString() : null,
       deleted: !!v.deleted, updatedAt: v.updatedAt || null,
+      hadAssistant: !!v.hadAssistant && int(v.assistant) > 0,
+      assistant: v.hadAssistant ? Math.max(0, int(v.assistant)) : 0,
+      usage: (Array.isArray(v.usage) ? v.usage : [])
+        .filter((u) => u && normalizeName(u.name) && Number(u.qty) > 0)
+        .map((u) => ({ productId: u.productId || null, name: normalizeName(u.name), qty: Number(u.qty),
+          unit: UNITS.includes(u.unit) ? u.unit : 'ml', cost: Math.max(0, int(u.cost)) })),
     }));
-  return { services, visits };
+  const out = { services, visits };
+  // Cópias da V1 não têm o cadastro de produtos: nesse caso o cadastro atual fica como está.
+  if (Array.isArray(obj.types) && Array.isArray(obj.subtypes) && Array.isArray(obj.products)) {
+    const types = obj.types.filter((t) => t && t.id && normalizeName(t.name))
+      .map((t, i) => ({ id: String(t.id), name: normalizeName(t.name), order: Number.isFinite(t.order) ? t.order : i }));
+    const typeIds = new Set(types.map((t) => t.id));
+    const subtypes = obj.subtypes.filter((s) => s && s.id && normalizeName(s.name) && typeIds.has(String(s.typeId)))
+      .map((s, i) => ({ id: String(s.id), typeId: String(s.typeId), name: normalizeName(s.name),
+        fields: (Array.isArray(s.fields) ? s.fields : []).map(normalizeName).filter(Boolean), order: Number.isFinite(s.order) ? s.order : i }));
+    const products = obj.products.filter((p) => p && p.id && normalizeName(p.name))
+      .map((p) => ({ id: String(p.id), name: normalizeName(p.name),
+        typeId: typeIds.has(String(p.typeId)) ? String(p.typeId) : null,
+        subtypeId: subtypes.some((s) => s.id === String(p.subtypeId)) ? String(p.subtypeId) : null,
+        traits: (Array.isArray(p.traits) ? p.traits : []).filter((t) => t && normalizeName(t.name))
+          .map((t) => ({ name: normalizeName(t.name), value: normalizeName(t.value) })),
+        cost: Math.max(0, int(p.cost)), packQty: Math.max(0, Number(p.packQty) || 0), unit: UNITS.includes(p.unit) ? p.unit : 'ml' }));
+    Object.assign(out, { types, subtypes, products });
+  }
+  return out;
+}
+
+/** O que impede apagar um tipo ou subtipo (produtos ligados a ele). */
+export function productsUsing(products, { typeId, subtypeId }) {
+  return products.filter((p) => (typeId && p.typeId === typeId) || (subtypeId && p.subtypeId === subtypeId));
+}
+
+/** Produtos agrupados por tipo e subtipo, na ordem do cadastro. */
+export function groupProducts(products, types, subtypes) {
+  const byOrder = (a, b) => (a.order ?? 0) - (b.order ?? 0) || a.name.localeCompare(b.name, 'pt-BR');
+  const groups = [];
+  for (const t of [...types].sort(byOrder)) {
+    const subs = subtypes.filter((s) => s.typeId === t.id).sort(byOrder);
+    const items = [];
+    for (const s of subs) for (const p of products.filter((x) => x.subtypeId === s.id).sort(byOrder)) items.push({ product: p, subtype: s });
+    for (const p of products.filter((x) => x.typeId === t.id && !subs.some((s) => s.id === x.subtypeId))) items.push({ product: p, subtype: null });
+    if (items.length) groups.push({ title: t.name, items });
+  }
+  const loose = products.filter((p) => !types.some((t) => t.id === p.typeId));
+  if (loose.length) groups.push({ title: 'Sem tipo', items: loose.map((p) => ({ product: p, subtype: null })) });
+  return groups;
 }
 
 export function backupFileName(now = new Date()) {

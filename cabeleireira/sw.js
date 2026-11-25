@@ -1,6 +1,6 @@
 // Guarda o app no celular para abrir mesmo sem internet (na casa da cliente).
 // Ao mudar qualquer arquivo, troque o número da versão abaixo.
-const CACHE = 'salao-em-casa-v1';
+const CACHE = 'salao-em-casa-v2';
 const SHELL = ['./', 'index.html', 'styles.css', 'js/app.js', 'js/logic.js', 'js/store.js', 'js/sync.js',
   'manifest.webmanifest', 'icons/icon-192.png', 'icons/apple-touch-icon.png'];
 

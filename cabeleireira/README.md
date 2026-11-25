@@ -7,16 +7,25 @@ Ideias e MVP"*.
 - Funciona **sem internet** (na casa da cliente) e guarda os dados **no próprio celular** (IndexedDB).
 - Quando tem internet, copia tudo para uma **planilha Google da conta dela**, sem custo.
 - Letras grandes, alto contraste e poucos toques.
+- **V2:** registra a assistente e os produtos usados em cada atendimento, para mostrar o custo e o lucro.
 
 ## As telas
 
 | Tela | O que tem |
 |---|---|
 | **Atender → Novo atendimento** | Nome da cliente (com sugestões de clientes já atendidas, é só tocar) e os serviços em botões grandes, separados por grupo (Cabelo, Unha, Maquiagem). Dá para marcar vários. |
-| **Conta da cliente** | Serviços e preços, botões **− Desconto** e **+ Acréscimo** (de R$ 10 em R$ 10, sem digitar) e o **total a pagar** bem grande. **Salvar**. |
+| **Atender → Teve assistente?** (V2) | Dois botões, **Sim** e **Não**. Começa em Não. Com Sim, aparece o campo “Quanto pagou à assistente?”, que já vem com o último valor usado. |
+| **Conta da cliente** | Serviços e preços, botões **− Desconto** e **+ Acréscimo** (de R$ 10 em R$ 10, sem digitar) e o **total a pagar** bem grande. Embaixo, **Produtos usados** (opcional) e o quadro **Só para você**, com o valor pago à assistente, o custo dos produtos e o **lucro do atendimento**. Esses custos não mudam o que a cliente paga. **Salvar**. |
+| **Produto usado** (V2) | Ela toca no produto e escreve quantos ml ou g gastou. O app calcula o custo pelo preço e pelo tamanho da embalagem (ex.: R$ 35 por 900 ml → 60 ml custam R$ 2,33). Da próxima vez, a quantidade já vem preenchida. |
 | **A receber** | Total a receber, a lista de quem **não pagou** (cada uma com seu botão **Recebi**) e, embaixo, quem já pagou. Dívidas com mais de 30 dias aparecem com “há 3 meses”, em vermelho. |
-| **Como recebeu?** | Quatro botões grandes: **Pix, Crédito, Débito, Dinheiro**. **Não recebi** (vermelho) desfaz um pagamento marcado por engano, mesmo dias depois. Também dá para apagar um atendimento lançado errado. |
-| **Ajustes** | Serviços e preços (mudar, criar, apagar), tamanho da letra, cópia de segurança em arquivo e ligação com a planilha. |
+| **Como recebeu?** | Quatro botões grandes: **Pix, Crédito, Débito, Dinheiro**. **Não recebi** (vermelho) desfaz um pagamento marcado por engano, mesmo dias depois. “Ver custo e lucro” mostra o quadro da assistente e dos produtos. Também dá para apagar um atendimento lançado errado. |
+| **Ajustes** | Serviços e preços (mudar, criar, apagar), **Produtos** e **Tipos e subtipos** (V2), tamanho da letra, cópia de segurança em arquivo e ligação com a planilha. |
+| **Tipos e subtipos** (V2) | Ela cria, muda e apaga tipos (ex.: Química) e subtipos (ex.: Água oxigenada). Em cada subtipo, define as **características** (ex.: Volume). Vem pronta a lista sugerida no documento (Química, Alisamento, Tratamento, Tonalização, Unha, Maquiagem, Podologia, Sobrancelha, Mega hair). Um tipo ou subtipo com produtos não pode ser apagado. |
+| **Produto** (V2) | Nome, tipo, subtipo, características com valor (ex.: Volume = 20, que já aparecem ao escolher o subtipo), custo e quantidade da embalagem em ml ou g. |
+
+**Lucro do atendimento** = total da cliente − valor pago à assistente − custo dos produtos usados.
+Sem produtos anotados, é o total menos a assistente, como pede o documento da V2. Os custos
+ficam gravados em cada atendimento: mudar o preço de um produto depois não muda os atendimentos antigos.
 
 As regras visuais do protótipo foram seguidas: **opções** (serviços, formas de pagamento) começam
 brancas e só ficam azuis quando tocadas; **ações** (Continuar, Salvar, Recebi) são azuis com texto
@@ -58,9 +67,15 @@ Faça isso **com a conta Google dela**, de preferência num computador.
 6. No celular dela: **Ajustes → Planilha Google → Ligar a planilha**. Cole o endereço e a senha e
    toque em **Salvar ligação**.
 
+> **Já tinha ligado a planilha na V1?** Troque o código do script pelo novo
+> ([`google-apps-script/Codigo.gs`](google-apps-script/Codigo.gs)), mantendo a sua senha, e faça
+> **Implantar → Gerenciar implantações → editar (lápis) → Versão: Nova versão → Implantar**. O
+> endereço continua o mesmo. Sem isso, a planilha não guarda a assistente nem os produtos.
+
 Pronto. A partir daí, cada atendimento salvo ou pagamento marcado vai para a planilha alguns
-segundos depois (ou quando a internet voltar). As abas **Atendimentos** e **Serviços** são criadas
-sozinhas.
+segundos depois (ou quando a internet voltar). As abas **Atendimentos**, **Serviços**,
+**Produtos** e **Tipos e subtipos** são criadas sozinhas. Em Atendimentos aparecem também as colunas
+**Assistente (R$)**, **Produtos usados**, **Custo dos produtos (R$)** e **Lucro (R$)**.
 
 > “Qualquer pessoa” quer dizer qualquer pessoa **que tenha o endereço e a senha**. Sem a senha o
 > script não mostra nem grava nada.
@@ -76,7 +91,8 @@ dados da planilha** sozinho, depois de confirmar.
 ### Corrigir dados pela planilha (suporte)
 
 Na aba **Atendimentos** dá para mudar **Cliente**, **Total (R$)**, **Situação** (`Pago`,
-`Não pago` ou `Apagado`) e **Forma de pagamento** (`Pix`, `Crédito`, `Débito`, `Dinheiro`). Também
+`Não pago` ou `Apagado`), **Forma de pagamento** (`Pix`, `Crédito`, `Débito`, `Dinheiro`) e
+**Assistente (R$)**. Na aba **Produtos**, dá para mudar nome, custo, embalagem e unidade. Também
 dá para acrescentar uma linha nova à mão (basta Data, Cliente, Serviços, Total e Situação). Não
 mexa nas colunas “não mexer”.
 
@@ -96,7 +112,8 @@ do arquivo (pede confirmação).
 ## Para quem for mexer no código
 
 - HTML, CSS e JavaScript puros, sem etapa de build.
-  - `js/logic.js` — regras (totais em centavos, desconto/acréscimo, quem deve, sugestões, cópia). Testado.
+  - `js/logic.js` — regras (totais em centavos, desconto/acréscimo, quem deve, sugestões, cópia,
+    custo dos produtos, lucro, lista inicial de tipos e subtipos). Testado.
   - `js/store.js` — banco no aparelho (IndexedDB).
   - `js/sync.js` — envio e leitura da planilha.
   - `js/app.js` — telas.
@@ -111,5 +128,14 @@ do arquivo (pede confirmação).
 ## Próximas versões (do documento)
 
 Chave Pix / QR Code com o valor, custo dos produtos por serviço, histórico por cliente, envio do
-valor pelo WhatsApp, relatórios de faturamento, pagamentos combinados e parcelados, comissão da
-assistente, gastos com deslocamento, agenda e comandos por voz.
+valor pelo WhatsApp, relatórios de faturamento, pagamentos combinados e parcelados, gastos com
+deslocamento, agenda e comandos por voz.
+
+## Perguntas em aberto (V2)
+
+- **Valor da assistente:** fixo, porcentagem do serviço ou combinado a cada atendimento? Por
+  enquanto ela digita o valor em cada atendimento, e o app sugere o último valor usado.
+- **Marcar se já pagou a assistente,** como faz com as clientes? Ainda não existe. Se for preciso,
+  dá para criar uma lista “A pagar à assistente”, parecida com “A receber”.
+- **Baixa no estoque:** o app calcula o custo do que foi gasto, mas não controla quanto ainda resta
+  na embalagem.
