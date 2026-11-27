@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AllSet · Viagens</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%F0%9F%A7%B3%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script>try{var t=localStorage.getItem("tema");if(!t)t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";document.documentElement.dataset.theme=t;}catch(e){document.documentElement.dataset.theme="light";}</script>
+<style>
+:root{
+  --bg:#F3F5F7; --bg-2:#E9EDF0; --card:#FFFFFF; --field:#F3F5F7; --ink:#14212B; --muted:#66737D; --faint:#A7B1B8;
+  --line:#E2E7EB; --line-soft:#EEF1F3;
+  --pri:#0E8A7E; --pri-2:#13B5A2; --pri-ink:#FFFFFF; --pri-soft:#DDF4F0; --pri-text:#0B7368;
+  --sun:#F59E0B; --sun-soft:#FFF4DE; --sun-line:#FBE1A6;
+  --red:#E0533F; --red-soft:#FDECE9;
+  --shadow:0 1px 2px rgba(20,33,43,.04),0 8px 24px rgba(20,33,43,.06);
+  --shadow-lg:0 12px 32px rgba(14,138,126,.30);
+  --r-sm:12px; --r:18px; --r-lg:24px;
+  color-scheme:light;
+}
+[data-theme="dark"]{
+  --bg:#0D1317; --bg-2:#172128; --card:#151D23; --field:#1C262D; --ink:#E9EFF2; --muted:#93A1AA; --faint:#5B6A73;
+  --line:#25313A; --line-soft:#1E2930;
+  --pri:#19B3A2; --pri-2:#3DD6C2; --pri-ink:#04211D; --pri-soft:#123A36; --pri-text:#5EE0CE;
+  --sun:#FBBF24; --sun-soft:#2A2312; --sun-line:#4A3B16;
+  --red:#FF7A66; --red-soft:#3A1E1A;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+  --shadow-lg:0 12px 32px rgba(25,179,162,.25);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Plus Jakarta Sans",system-ui,sans-serif;font-size:16px;-webkit-font-smoothing:antialiased;transition:background .25s,color .25s}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none;-webkit-tap-highlight-color:transparent}
+button:focus-visible,select:focus-visible{outline:2px solid var(--pri);outline-offset:2px}
+input,select{font:inherit;color:inherit}
+#app{max-width:560px;margin:0 auto;padding:calc(20px + env(safe-area-inset-top)) calc(18px + env(safe-area-inset-right)) calc(120px + env(safe-area-inset-bottom)) calc(18px + env(safe-area-inset-left));min-height:100vh;min-height:100dvh}
+h1,h2,h3{margin:0;letter-spacing:-.02em}
+h1{font-size:30px;line-height:1.1;font-weight:800}
+h2{font-size:21px;line-height:1.2;font-weight:800}
+.eyebrow{margin:0 0 6px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--pri-text)}
+.top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:6px 0 18px}
+.theme{width:44px;height:44px;border-radius:999px;background:var(--card);box-shadow:var(--shadow);display:grid;place-items:center;flex:none;transition:transform .2s}
+.theme:active{transform:scale(.92)}
+.theme svg{width:20px;height:20px;stroke:var(--ink)}
+.banner{background:var(--sun-soft);border:1px solid var(--sun-line);border-radius:var(--r);padding:12px 14px;font-size:14px;margin-bottom:16px;line-height:1.45}
+.tabs{display:flex;gap:4px;background:var(--bg-2);padding:5px;border-radius:999px;margin-bottom:20px}
+.tabs button{flex:1;padding:10px 0;border-radius:999px;font-weight:700;font-size:15px;color:var(--muted);transition:.2s}
+.tabs button.on{background:var(--card);color:var(--ink);box-shadow:var(--shadow)}
+.sec-t{font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:24px 4px 10px}
+.card{background:var(--card);border-radius:var(--r-lg);box-shadow:var(--shadow)}
+.trip{display:flex;gap:14px;align-items:center;padding:14px 16px 14px 14px;margin-bottom:12px;width:100%;text-align:left;transition:transform .15s}
+.trip:active{transform:scale(.985)}
+.trip .ic{width:52px;height:52px;border-radius:18px;background:linear-gradient(135deg,var(--pri-soft),var(--bg-2));display:grid;place-items:center;font-size:26px;flex:none}
+.trip.past{opacity:.75}
+.trip .bd{flex:1;min-width:0}
+.trip .nm{font-weight:800;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.trip .mt{font-size:13px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar{height:7px;background:var(--bg-2);border-radius:99px;overflow:hidden;margin-top:10px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--pri),var(--pri-2));border-radius:99px;transition:width .35s}
+.trip .pc{font-size:13px;font-weight:800;color:var(--pri-text);flex:none;background:var(--pri-soft);padding:6px 10px;border-radius:999px}
+.empty{text-align:center;padding:48px 24px;color:var(--muted);line-height:1.5}
+.empty .big{font-size:48px;width:96px;height:96px;border-radius:32px;background:var(--card);box-shadow:var(--shadow);display:grid;place-items:center;margin:0 auto 18px}
+.empty b{display:block;color:var(--ink);font-size:18px;margin-bottom:6px}
+.fab{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(24px + env(safe-area-inset-bottom));background:linear-gradient(135deg,var(--pri),var(--pri-2));color:var(--pri-ink);font-weight:800;padding:16px 28px;border-radius:999px;box-shadow:var(--shadow-lg);font-size:16px;white-space:nowrap;z-index:5;transition:transform .15s}
+.fab:active{transform:translateX(-50%) scale(.96)}
+.hdr{display:flex;align-items:center;gap:12px;padding:4px 0 18px}
+.back{width:44px;height:44px;border-radius:999px;background:var(--card);box-shadow:var(--shadow);font-size:20px;flex:none;display:grid;place-items:center}
+.hdr .t{flex:1;min-width:0}
+.hdr h2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word}
+.hdr .eyebrow{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hdr p{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hdr p{margin:3px 0 0;font-size:13px;color:var(--muted)}
+.hdr .x{color:var(--muted);font-size:14px;font-weight:700;padding:10px 14px;border-radius:999px;background:var(--bg-2)}
+label{display:block;font-size:14px;font-weight:700;margin-bottom:16px}
+label input{display:block;width:100%;margin-top:8px;padding:14px 16px;border:1.5px solid transparent;border-radius:16px;background:var(--card);box-shadow:var(--shadow);font-weight:500;transition:border .15s}
+label input:focus,.add input:focus,.minput:focus{outline:none;border-color:var(--pri)}
+input[type=date]{min-height:52px;min-width:0;max-width:100%;-webkit-appearance:none;appearance:none;text-align:left}
+.row2 > label{min-width:0}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.lbl{font-size:14px;font-weight:700;margin:8px 0 10px}
+.lbl span{font-weight:500;color:var(--muted)}
+.types{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.type{display:flex;gap:10px;align-items:center;padding:14px;border-radius:var(--r);background:var(--card);border:2px solid transparent;box-shadow:var(--shadow);text-align:left;transition:.15s}
+.type .e{font-size:24px}
+.type b{display:block;font-size:15px}
+.type small{color:var(--muted);font-size:12px;line-height:1.35}
+.type.on,.pf.on,.opt-card.on{border-color:var(--pri);background:var(--pri-soft)}
+.preview{margin:18px 0;padding:16px;border-radius:var(--r);background:var(--sun-soft);border:1px solid var(--sun-line);font-size:14px;line-height:1.5}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:8px 14px;border-radius:999px;background:var(--card);box-shadow:var(--shadow);font-size:14px;font-weight:600}
+.chip.on{background:var(--pri-soft);color:var(--pri-text)}
+.chip small{color:var(--muted);font-weight:500}
+.primary{display:block;width:100%;background:linear-gradient(135deg,var(--pri),var(--pri-2));color:var(--pri-ink);font-weight:800;padding:17px;border-radius:999px;margin-top:22px;font-size:16px;box-shadow:var(--shadow-lg);transition:transform .15s,opacity .2s}
+.primary:active{transform:scale(.98)}
+.primary:disabled{opacity:.4;cursor:default;box-shadow:none}
+.prog{padding:18px 20px;margin-bottom:16px}
+.prog .row{display:flex;justify-content:space-between;align-items:baseline}
+.prog .big{font-size:30px;font-weight:800;letter-spacing:-.03em}
+.prog .row span{color:var(--muted);font-size:14px;font-weight:600}
+.prog.done{background:linear-gradient(135deg,var(--pri),var(--pri-2));color:var(--pri-ink)}
+.prog.done .row span{color:inherit;opacity:.8}
+.prog.done .bar{background:rgba(255,255,255,.3)}
+.prog.done .bar i{background:currentColor}
+.add{display:flex;gap:8px;margin-bottom:8px}
+.add input{flex:1;min-width:0;padding:14px 18px;border:1.5px solid transparent;border-radius:999px;background:var(--card);box-shadow:var(--shadow)}
+.add .go{width:52px;height:52px;flex:none;background:var(--ink);color:var(--bg);border-radius:999px;font-weight:700;font-size:22px}
+.mic{width:52px;height:52px;border-radius:999px;background:var(--sun-soft);border:1px solid var(--sun-line);font-size:20px;flex:none}
+.mic.live{background:var(--red);border-color:var(--red);animation:pulse 1.2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(224,83,63,.5)}100%{box-shadow:0 0 0 14px rgba(224,83,63,0)}}
+.hint{font-size:13px;color:var(--muted);margin:6px 6px 16px;min-height:18px;line-height:1.45}
+.hint.live{color:var(--red);font-weight:700}
+.seg{display:flex;gap:8px;margin-bottom:6px;align-items:center}
+.seg button{padding:8px 16px;border-radius:999px;font-size:14px;font-weight:700;background:var(--bg-2);color:var(--muted);transition:.15s}
+.seg button.on{background:var(--ink);color:var(--bg)}
+.seg .sp{flex:1}
+.seg{flex-wrap:wrap}
+.seg .lite{background:none;color:var(--pri-text);padding:8px 4px;margin-left:auto;white-space:nowrap}
+.grp{margin-top:22px}
+.grp h3{display:flex;justify-content:space-between;align-items:center;margin:0 6px 10px}
+.grp h3 > span:last-child{color:var(--muted);font-weight:700;font-size:12px;background:var(--bg-2);padding:4px 10px;border-radius:999px}
+.grp h3 .tt{display:flex;align-items:center;gap:4px;color:var(--ink);font-weight:800;font-size:15px}
+.fold{font-weight:800;font-size:15px;color:var(--ink);padding:2px 0;text-align:left}
+.ren{color:var(--muted);font-size:14px;padding:4px 8px;border-radius:999px}
+@media (hover:hover){.ren:hover{background:var(--bg-2)}}
+.list{overflow:hidden;border-radius:var(--r-lg)}
+.it{display:flex;align-items:center;gap:12px;padding:12px 12px 12px 14px;border-top:1px solid var(--line-soft);transition:background .15s}
+.it:first-child{border-top:0}
+.sub-h{display:flex;width:100%;text-align:left;justify-content:space-between;align-items:center;padding:14px 16px 8px;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--pri-text);background:linear-gradient(var(--field),transparent)}
+.sub-h:not(:first-child){border-top:1px solid var(--line)}
+.sub-h small{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:0;text-transform:none}
+.sub-h .seta{font-style:normal;display:inline-block;width:16px;color:var(--muted)}
+.sub-h.fechado{padding-bottom:14px}
+.sub-h.completo{color:var(--muted)}
+.sub-h.completo small{color:var(--pri-text)}
+.grp.completo h3 > span:last-child{background:var(--pri-soft);color:var(--pri-text)}
+.sub-h + .it{border-top:0}
+.chk{position:relative;width:26px;height:26px;border-radius:999px;border:2px solid var(--faint);flex:none;display:grid;place-items:center;color:var(--pri-ink);font-size:14px;font-weight:800;transition:.15s}
+.chk::after{content:"";position:absolute;inset:-10px}
+.it.done .chk{background:linear-gradient(135deg,var(--pri),var(--pri-2));border-color:transparent}
+.it .nm{flex:1;min-width:0;cursor:pointer;font-weight:500;line-height:1.35}
+.it.done .nm{color:var(--faint);text-decoration:line-through}
+.it .tag{font-size:11px;color:var(--sun);font-weight:800;margin-left:4px}
+.dono{display:block;font-size:12px;color:var(--muted);text-decoration:none;font-weight:500}
+.qty{display:flex;align-items:center;background:var(--field);border-radius:999px;padding:2px}
+.qty button{width:28px;height:28px;font-size:16px;color:var(--muted);border-radius:999px}
+@media (hover:hover){.qty button:hover{background:var(--card)}}
+.qty span{min-width:20px;text-align:center;font-size:14px;font-weight:800}
+.qty button:disabled{opacity:.3;cursor:default}
+.del{width:30px;height:30px;color:var(--faint);font-size:20px;border-radius:999px}
+@media (hover:hover){.del:hover{color:var(--red);background:var(--red-soft)}}
+.cheer{text-align:center;padding:22px;font-size:15px;color:var(--muted)}
+.danger{display:block;margin:36px auto 0;color:var(--red);font-weight:700;font-size:14px;padding:10px 18px;border-radius:999px}
+@media (hover:hover){.danger:hover{background:var(--red-soft)}}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat{padding:16px 14px}
+.stat b{display:block;font-size:28px;font-weight:800;letter-spacing:-.03em}
+.stat span{font-size:12px;color:var(--muted);font-weight:600}
+.rank{padding:4px 0}
+.rk{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;padding:12px 16px;border-top:1px solid var(--line-soft);font-weight:500}
+.rk:first-child{border-top:0}
+.rk .bar{margin-top:7px;height:5px}
+.rk .bar i{background:linear-gradient(90deg,var(--sun),#FCD34D)}
+.rk small{color:var(--muted);font-size:12px;white-space:nowrap;font-weight:600}
+.note{font-size:13px;color:var(--muted);margin:10px 4px 0;line-height:1.5}
+.modal{position:fixed;inset:0;background:rgba(5,12,16,.55);backdrop-filter:blur(4px);display:grid;place-items:center;padding:20px;z-index:20}
+.modal .box{background:var(--card);border-radius:28px;padding:24px;max-width:380px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.modal p{margin:8px 0 20px;color:var(--muted);font-size:15px;line-height:1.5}
+.modal .acts{display:flex;gap:8px;justify-content:flex-end}
+.modal .acts button{padding:12px 20px;border-radius:999px;font-weight:700;background:var(--bg-2)}
+.modal .acts .ok{background:var(--red);color:#fff}
+.modal .acts .ok.neutral{background:linear-gradient(135deg,var(--pri),var(--pri-2));color:var(--pri-ink)}
+.minput{width:100%;padding:14px 16px;border:1.5px solid var(--line);border-radius:16px;margin:16px 0 20px;font-size:16px;background:var(--field)}
+#toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:999px;font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;max-width:90vw;z-index:30;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+#toast.tem-acao{pointer-events:auto;display:flex;align-items:center;gap:12px;width:max-content;max-width:min(92vw,460px);border-radius:20px}
+#toast .undo{color:var(--sun);font-weight:800;padding:4px 6px;flex:none}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.quem{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:8px}
+.pf{display:flex;align-items:center;gap:12px;padding:10px 10px 10px 16px;min-width:0;border-radius:var(--r);background:var(--card);border:2px solid transparent;box-shadow:var(--shadow);transition:.15s}
+.pf .e{font-size:24px;flex:none}.pf b{flex:1;min-width:0;font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pf .qty{flex:none}.pf .qty button{width:34px;height:34px;font-size:18px}.pf .qty span{min-width:26px}
+.pf.on .qty{background:var(--card)}
+.para{font-size:13px;color:var(--muted);margin:4px 6px 0;display:flex;align-items:center;gap:8px;font-weight:600}
+.para select{font-size:14px;font-weight:600;color:var(--ink);padding:8px 12px;border-radius:999px;border:0;background:var(--card);box-shadow:var(--shadow)}
+.dots{display:flex;gap:6px;margin:-6px 0 26px}
+.dots i{flex:1;height:5px;border-radius:99px;background:var(--bg-2);transition:.3s}
+.dots i.on{background:linear-gradient(90deg,var(--pri),var(--pri-2))}
+.q{font-size:28px;margin-bottom:8px}
+.sub{color:var(--muted);font-size:14px;margin:0 0 18px;line-height:1.5}
+.wiz h2.q + label{margin-top:18px}
+.opt{font-weight:500;color:var(--muted)}
+.opt-card{display:flex;gap:14px;align-items:flex-start;width:100%;text-align:left;padding:16px;border-radius:var(--r);background:var(--card);border:2px solid transparent;box-shadow:var(--shadow);margin-top:12px;transition:.15s}
+.opt-card .e{font-size:22px;width:40px;height:40px;border-radius:14px;background:var(--bg-2);display:grid;place-items:center;flex:none}
+.opt-card.on .e{background:var(--card)}
+.opt-card b{display:block;margin-bottom:2px}.opt-card small{color:var(--muted);font-size:13px;line-height:1.45}
+.opt-card:disabled{opacity:.45;cursor:default}
+.wiz-nav{margin-top:8px}
+.rvbox{padding:4px 18px;margin-top:16px}
+.rv{display:grid;grid-template-columns:78px 1fr auto;gap:10px;align-items:baseline;padding:13px 0;border-top:1px solid var(--line-soft);font-size:14px}
+.rv:first-child{border-top:0}
+.rv span{color:var(--muted);font-weight:600}
+.rv button{color:var(--pri-text);font-weight:700;font-size:13px}
+.top-acts{display:flex;gap:8px;flex:none}
+.avatar{width:44px;height:44px;border-radius:999px;background:linear-gradient(135deg,var(--pri),var(--pri-2));color:var(--pri-ink);font-weight:800;font-size:15px;box-shadow:var(--shadow)}
+.auth-top{display:flex;justify-content:flex-end}
+.auth{padding:8px 4px 40px;max-width:420px;margin:0 auto}
+.auth h1{font-size:32px;line-height:1.12;margin-bottom:10px}
+.auth .sub{font-size:15px;margin-bottom:24px}
+.logo{width:64px;height:64px;border-radius:22px;background:linear-gradient(135deg,var(--pri),var(--pri-2));color:var(--pri-ink);display:grid;place-items:center;box-shadow:var(--shadow-lg);margin:4px 0 26px}
+.logo svg{width:34px;height:34px}
+.google{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:15px;border-radius:999px;background:var(--card);box-shadow:var(--shadow);font-weight:700;font-size:16px;border:1.5px solid var(--line)}
+.google svg{width:20px;height:20px}
+.google:disabled{opacity:.7;cursor:default}
+.spin{width:18px;height:18px;border-radius:99px;border:2.5px solid var(--line);border-top-color:var(--pri);animation:girar .8s linear infinite}
+@keyframes girar{to{transform:rotate(360deg)}}
+.ou{display:flex;align-items:center;gap:12px;margin:22px 0;color:var(--muted);font-size:13px;font-weight:600}
+.ou::before,.ou::after{content:"";flex:1;height:1px;background:var(--line)}
+.esq{text-align:right;margin:-6px 0 4px}
+.esq button,.troca button{color:var(--pri-text);font-weight:700;font-size:14px}
+.troca{text-align:center;color:var(--muted);font-size:14px;margin-top:22px}
+.check{display:flex;gap:10px;align-items:flex-start;font-weight:500;font-size:14px;color:var(--muted);line-height:1.4}
+.check input{width:20px;height:20px;margin:0;padding:0;flex:none;display:inline-block;box-shadow:none;border:0;accent-color:var(--pri)}
+.erro{color:var(--red);background:var(--red-soft);padding:10px 14px;border-radius:14px;font-size:14px;font-weight:600;margin:4px 0 0}
+.demo-note{text-align:center;color:var(--faint);font-size:12px;margin-top:26px}
+.cal-resumo{display:flex;align-items:stretch;gap:8px;margin-bottom:12px}
+.cal-r{flex:1;background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:10px 14px;border:2px solid transparent;transition:.15s}
+.cal-r small{display:block;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.cal-r b{font-size:16px;font-weight:700;color:var(--faint)}
+.cal-r.tem b{color:var(--ink)}
+.cal-r.ativo{border-color:var(--pri)}
+.cal-seta{align-self:center;color:var(--muted);font-weight:700}
+.cal{padding:14px 12px 10px}
+.cal-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.cal-top b{font-size:16px;font-weight:800;text-transform:capitalize}
+.cal-nav{width:40px;height:40px;border-radius:999px;background:var(--bg-2);font-size:22px;line-height:1;font-weight:700}
+.cal-nav:disabled{opacity:.3;cursor:default}
+.cal-sem,.cal-grid{display:grid;grid-template-columns:repeat(7,1fr)}
+.cal-sem span{text-align:center;font-size:12px;font-weight:700;color:var(--muted);padding:6px 0}
+.cal-grid .c{position:relative;display:flex;justify-content:center;padding:2px 0}
+.cal-grid .n{position:relative;z-index:1;width:100%;max-width:44px;aspect-ratio:1;border-radius:999px;font-weight:600;font-size:15px}
+.cal-grid .n:disabled{color:var(--faint);opacity:.5;cursor:default}
+.cal-grid .hoje .n{box-shadow:inset 0 0 0 1.5px var(--line)}
+.cal-grid .entre{background:var(--pri-soft)}
+.cal-grid .entre .n{color:var(--pri-text)}
+.cal-grid .faixa-d{background:linear-gradient(90deg,transparent 50%,var(--pri-soft) 50%)}
+.cal-grid .faixa-e{background:linear-gradient(90deg,var(--pri-soft) 50%,transparent 50%)}
+.cal-grid .ini .n,.cal-grid .fim .n{background:linear-gradient(135deg,var(--pri),var(--pri-2));color:var(--pri-ink);font-weight:800;box-shadow:0 4px 12px rgba(14,138,126,.3)}
+.cal-grid .entre,.cal-grid .faixa-d,.cal-grid .faixa-e{margin:2px 0;padding:0}
+.cal-info{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:14px 6px 0;font-size:14px;color:var(--muted)}
+.cal-info b{color:var(--ink)}
+.cal-info button{color:var(--pri-text);font-weight:700;padding:6px 10px;border-radius:999px;background:var(--bg-2);font-size:13px}
+@media (hover:hover){.cal-grid .n:not(:disabled):hover{background:var(--bg-2)}.cal-grid .ini .n:hover,.cal-grid .fim .n:hover{background:linear-gradient(135deg,var(--pri),var(--pri-2))}}
+.bloco{padding:16px 16px 6px;margin-bottom:22px}
+.bloco-t{font-size:15px;font-weight:800;margin:0 0 12px}
+.bloco-l{font-size:13px;font-weight:700;color:var(--muted);margin:12px 2px 8px}
+.bloco .add{margin-bottom:0}
+.bloco .add input{background:var(--field);box-shadow:none}
+.bloco .hint{margin:10px 2px 8px}
+.chips.rolar{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding:2px 2px 6px;margin:0 -2px;-webkit-overflow-scrolling:touch}
+.chips.rolar::-webkit-scrollbar{display:none}
+.chips.rolar .chip{flex:none;white-space:nowrap}
+.bloco .chip{box-shadow:none;background:var(--field)}
+.bloco .chip.on{background:var(--pri);color:var(--pri-ink)}
+.bloco-lista{margin-bottom:6px}
+.lista-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 4px 10px}
+.lista-top .bloco-t{margin:0}
+.lite{background:none;color:var(--pri-text);font-weight:700;font-size:14px;padding:6px 2px;white-space:nowrap}
+.busca{display:flex;align-items:center;gap:8px;background:var(--card);border-radius:999px;box-shadow:var(--shadow);padding:0 8px 0 16px;margin-bottom:10px;border:1.5px solid transparent}
+.busca:focus-within{border-color:var(--pri)}
+.busca input{flex:1;min-width:0;border:0;background:none;padding:13px 0;font-size:16px;outline:none}
+.busca input::-webkit-search-cancel-button{display:none}
+.busca button{width:32px;height:32px;border-radius:999px;color:var(--muted);font-size:20px;background:var(--bg-2)}
+.filtros{margin-bottom:8px}
+.filtro-p .fchip{box-shadow:none;background:var(--bg-2);color:var(--muted);font-weight:700;font-size:13px;padding:7px 12px}
+.filtro-p .fchip.on{background:var(--ink);color:var(--bg)}
+.multi-tag{display:inline-block;background:var(--pri-soft);color:var(--pri-text);font-weight:800;font-size:12px;padding:5px 10px;border-radius:999px;margin-bottom:8px}
+.type.multi{position:relative;padding-right:34px}
+.tick{position:absolute;top:10px;right:10px;width:20px;height:20px;border-radius:7px;border:2px solid var(--faint);display:grid;place-items:center;font-size:12px;font-weight:900;color:var(--pri-ink)}
+.on > .tick{background:var(--pri);border-color:var(--pri)}
+.on > .tick::after{content:"✓"}
+.selecao{font-size:14px;color:var(--muted);margin:14px 4px 0}
+.selecao b{color:var(--ink)}
+.sub-linha{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
+.quem-casa{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.pessoa{position:relative;display:flex;align-items:center;gap:10px;padding:14px 34px 14px 14px;border-radius:var(--r);background:var(--card);box-shadow:var(--shadow);border:2px solid transparent;text-align:left;min-width:0}
+.pessoa.on{border-color:var(--pri);background:var(--pri-soft)}
+.pessoa .e{font-size:26px;flex:none}
+.pessoa .pn{min-width:0}
+.pessoa b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pessoa small{color:var(--muted);font-size:12px}
+.dobra{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);margin-bottom:10px;padding:0 14px}
+.dobra summary{cursor:pointer;list-style:none;padding:14px 0;font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px}
+.dobra summary::-webkit-details-marker{display:none}
+.dobra[open] summary{border-bottom:1px solid var(--line-soft);margin-bottom:12px}
+.dobra[open]{padding-bottom:12px}
+.dobra .quem .pf{box-shadow:none;background:var(--field)}
+.dobra .quem .pf.on{background:var(--pri-soft)}
+.badge{background:var(--pri);color:var(--pri-ink);font-size:12px;padding:2px 8px;border-radius:999px}
+.np input#npNome{width:100%;padding:14px 16px;border:1.5px solid transparent;border-radius:16px;background:var(--field);font-size:16px}
+.np input#npNome:focus{outline:none;border-color:var(--pri)}
+.np .chip{box-shadow:none;background:var(--field)}
+.np .chip.on{background:var(--pri);color:var(--pri-ink)}
+.btn2{display:block;width:100%;margin:14px 0 6px;padding:13px;border-radius:999px;background:var(--ink);color:var(--bg);font-weight:800}
+.pessoa-it .e{font-size:24px;width:32px;text-align:center}
+.pessoa-it .nm b{display:block}
+@media (max-width:370px){ .quem-casa{grid-template-columns:1fr} }
+.loading{padding:80px 0;text-align:center;color:var(--muted)}
+/* ---------- celular ---------- */
+@media (max-width:440px){
+  #app{padding-left:calc(14px + env(safe-area-inset-left));padding-right:calc(14px + env(safe-area-inset-right));padding-top:calc(14px + env(safe-area-inset-top))}
+  h1{font-size:26px}
+  .auth h1{font-size:28px}
+  .q{font-size:24px}
+  .hdr h2{font-size:19px}
+  .hdr{gap:10px}
+  .card{border-radius:20px}
+  .list{border-radius:20px}
+  .it{gap:8px;padding:10px 8px 10px 12px}
+  .it .nm{font-size:15px}
+  .qty button{width:32px;height:32px}
+  .del{width:32px;height:32px}
+  .para select,.add input,label input,.minput{font-size:16px}
+  .add .go,.mic{width:50px;height:50px}
+  .prog{padding:16px}
+  .prog .big{font-size:26px}
+  .type{padding:12px;gap:8px}
+  .type .e{font-size:22px}
+  .stat{padding:14px 10px}
+  .stat b{font-size:24px}
+  .rv{grid-template-columns:70px 1fr auto;gap:8px}
+  .trip{padding:12px;gap:12px}
+  .trip .ic{width:46px;height:46px;border-radius:16px;font-size:23px}
+  .sub-h{padding-left:14px;padding-right:12px}
+  .fab{padding:15px 24px}
+}
+@media (max-width:370px){
+  .row2{grid-template-columns:1fr;gap:0}
+  .types{grid-template-columns:1fr}
+  .type small{font-size:12px}
+  .tabs button{font-size:14px}
+  .seg button{padding:8px 12px;font-size:13px}
+  .stats{gap:8px}
+  .stat b{font-size:21px}
+  .stat span{font-size:11px}
+  .trip .pc{padding:5px 8px;font-size:12px}
+  .qty button{width:28px}
+  .qty span{min-width:18px}
+  .del{width:26px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast"></div>
+<script>
+// Usado só quando a base de dados não está disponível (modo demonstração).
+const SEED_DEMO = {"modelos": {"essencial": {"nome": "Essencial", "icone": "🧳", "descricao": "Itens do grupo, em toda viagem", "ordem": 0, "sempre": true, "itens": [{"nome": "Cartão e um pouco de dinheiro", "categoria": "Documentos", "qtd": 1}, {"nome": "Carregador extra ou power bank", "categoria": "Eletrônicos", "qtd": 1}, {"nome": "Pasta de dente", "categoria": "Higiene", "qtd": 1}, {"nome": "Shampoo, condicionador e sabonete", "categoria": "Higiene", "qtd": 1}, {"nome": "Kit farmácia (analgésico, curativo, antialérgico)", "categoria": "Saúde", "qtd": 1}, {"nome": "Sacola para roupa suja", "categoria": "Acessórios", "qtd": 1}, {"nome": "Desligar o registro do gás", "categoria": "Antes de sair", "qtd": 1}, {"nome": "Tirar o lixo", "categoria": "Antes de sair", "qtd": 1}, {"nome": "Fechar janelas e trancar portas", "categoria": "Antes de sair", "qtd": 1}, {"nome": "Tirar aparelhos da tomada", "categoria": "Antes de sair", "qtd": 1}, {"nome": "Pedir para alguém regar as plantas", "categoria": "Antes de sair", "qtd": 1}]}, "praia": {"nome": "Praia", "icone": "🏖️", "descricao": "Sol, mar e calor", "ordem": 1, "sempre": false, "itens": [{"nome": "Roupa de banho", "categoria": "Roupas", "qtd": 2, "porPessoa": true}, {"nome": "Chinelo ou sandália", "categoria": "Calçados", "qtd": 1, "porPessoa": true}, {"nome": "Chapéu ou boné", "categoria": "Acessórios", "qtd": 1, "porPessoa": true}, {"nome": "Óculos de sol", "categoria": "Acessórios", "qtd": 1, "porPessoa": true}, {"nome": "Protetor solar", "categoria": "Saúde", "qtd": 1}, {"nome": "Pós-sol", "categoria": "Saúde", "qtd": 1}, {"nome": "Repelente", "categoria": "Saúde", "qtd": 1}, {"nome": "Canga ou toalha de praia", "categoria": "Acessórios", "qtd": 2}, {"nome": "Bolsa térmica", "categoria": "Acessórios", "qtd": 1}]}, "campo": {"nome": "Campo e trilha", "icone": "⛺", "descricao": "Sítio, camping, natureza", "ordem": 4, "sempre": false, "itens": [{"nome": "Tênis de trilha ou bota", "categoria": "Calçados", "qtd": 1, "porPessoa": true}, {"nome": "Capa de chuva", "categoria": "Roupas", "qtd": 1, "porPessoa": true}, {"nome": "Garrafa de água", "categoria": "Acessórios", "qtd": 1, "porPessoa": true}, {"nome": "Repelente", "categoria": "Saúde", "qtd": 1}, {"nome": "Kit de primeiros socorros", "categoria": "Saúde", "qtd": 1}, {"nome": "Lanterna", "categoria": "Acessórios", "qtd": 1}, {"nome": "Mochila pequena", "categoria": "Acessórios", "qtd": 1}, {"nome": "Saco de dormir", "categoria": "Acessórios", "qtd": 1, "porPessoa": true}]}, "trabalho": {"nome": "Trabalho", "icone": "💼", "descricao": "Reuniões e eventos", "ordem": 5, "sempre": false, "itens": [{"nome": "Notebook e carregador", "categoria": "Trabalho", "qtd": 1}, {"nome": "Adaptador HDMI / USB-C", "categoria": "Trabalho", "qtd": 1}, {"nome": "Crachá e documentos da empresa", "categoria": "Trabalho", "qtd": 1}, {"nome": "Bloco de notas e caneta", "categoria": "Trabalho", "qtd": 1}, {"nome": "Roupa social", "categoria": "Roupas", "porDia": 1, "porPessoa": true, "soAdulto": true}, {"nome": "Sapato social", "categoria": "Calçados", "qtd": 1, "porPessoa": true, "soAdulto": true}]}, "internacional": {"nome": "Internacional", "icone": "✈️", "descricao": "Fora do Brasil", "ordem": 6, "sempre": false, "itens": [{"nome": "Passaporte", "categoria": "Documentos", "qtd": 1, "porPessoa": true}, {"nome": "Visto (se necessário)", "categoria": "Documentos", "qtd": 1, "porPessoa": true}, {"nome": "Seguro viagem", "categoria": "Documentos", "qtd": 1}, {"nome": "Cópias dos documentos", "categoria": "Documentos", "qtd": 1}, {"nome": "Comprovantes de hospedagem e passagem", "categoria": "Documentos", "qtd": 1}, {"nome": "Cartão internacional ou moeda local", "categoria": "Documentos", "qtd": 1}, {"nome": "Adaptador de tomada", "categoria": "Eletrônicos", "qtd": 1}, {"nome": "Chip ou eSIM internacional", "categoria": "Eletrônicos", "qtd": 1}]}, "resort": {"nome": "Resort na praia", "icone": "🏝️", "descricao": "Piscina e praia", "ordem": 2, "sempre": false, "itens": [{"nome": "Roupa de banho", "categoria": "Roupas", "porPessoa": true, "porDia": 0.5, "extra": 1}, {"nome": "Saída de praia ou bermuda leve", "categoria": "Roupas", "porPessoa": true, "qtd": 2}, {"nome": "Roupa para o jantar", "categoria": "Roupas", "porPessoa": true, "porDia": 0.5}, {"nome": "Chinelo ou sandália", "categoria": "Calçados", "porPessoa": true, "qtd": 1}, {"nome": "Chapéu ou boné", "categoria": "Acessórios", "porPessoa": true, "qtd": 1}, {"nome": "Óculos de sol", "categoria": "Acessórios", "porPessoa": true, "qtd": 1}, {"nome": "Óculos de natação", "categoria": "Acessórios", "porPessoa": true, "soCrianca": true, "qtd": 1}, {"nome": "Boia ou colete infantil", "categoria": "Acessórios", "porPessoa": true, "soCrianca": true, "qtd": 1}, {"nome": "Protetor solar", "categoria": "Saúde", "qtd": 1}, {"nome": "Pós-sol", "categoria": "Saúde", "qtd": 1}, {"nome": "Repelente", "categoria": "Saúde", "qtd": 1}, {"nome": "Bolsa de praia", "categoria": "Acessórios", "qtd": 1}, {"nome": "Saco impermeável para roupa molhada", "categoria": "Acessórios", "qtd": 1}, {"nome": "Capa à prova d'água para o celular", "categoria": "Eletrônicos", "qtd": 1}]}, "hotel-fazenda": {"nome": "Hotel fazenda", "icone": "🐴", "descricao": "Piscina e natureza", "ordem": 3, "sempre": false, "itens": [{"nome": "Roupa de banho", "categoria": "Roupas", "porPessoa": true, "qtd": 2}, {"nome": "Calça comprida para cavalgada e trilha", "categoria": "Roupas", "porPessoa": true, "qtd": 1}, {"nome": "Blusa leve para a noite", "categoria": "Roupas", "porPessoa": true, "qtd": 1}, {"nome": "Tênis ou bota que pode sujar", "categoria": "Calçados", "porPessoa": true, "qtd": 1}, {"nome": "Chinelo ou sandália", "categoria": "Calçados", "porPessoa": true, "qtd": 1}, {"nome": "Chapéu ou boné", "categoria": "Acessórios", "porPessoa": true, "qtd": 1}, {"nome": "Boia ou colete infantil", "categoria": "Acessórios", "porPessoa": true, "soCrianca": true, "qtd": 1}, {"nome": "Roupa extra para brincar ao ar livre", "categoria": "Roupas", "porPessoa": true, "qtd": 2, "soCrianca": true}, {"nome": "Protetor solar", "categoria": "Saúde", "qtd": 1}, {"nome": "Repelente", "categoria": "Saúde", "qtd": 1}, {"nome": "Pomada para picada de inseto", "categoria": "Saúde", "qtd": 1}, {"nome": "Lanterna", "categoria": "Acessórios", "qtd": 1}, {"nome": "Saco para roupa molhada ou suja", "categoria": "Acessórios", "qtd": 1}]}, "urbana": {"nome": "Urbana", "icone": "🏙️", "descricao": "Cidade, passeios e restaurantes", "ordem": 7, "sempre": false, "itens": [{"nome": "Tênis confortável para caminhar", "categoria": "Calçados", "porPessoa": true, "qtd": 1}, {"nome": "Roupa para sair à noite", "categoria": "Roupas", "porPessoa": true, "qtd": 2, "soAdulto": true}, {"nome": "Garrafa de água", "categoria": "Acessórios", "porPessoa": true, "qtd": 1}, {"nome": "Mochila ou bolsa pequena de passeio", "categoria": "Acessórios", "porPessoa": true, "soAdulto": true, "qtd": 1}, {"nome": "Carregador extra ou power bank", "categoria": "Eletrônicos", "qtd": 1}, {"nome": "Guarda-chuva pequeno", "categoria": "Acessórios", "qtd": 1}, {"nome": "Ingressos e reservas (no celular ou impressos)", "categoria": "Documentos", "qtd": 1}, {"nome": "Cartão de transporte ou app de mobilidade", "categoria": "Documentos", "qtd": 1}, {"nome": "Cadeado para a mala", "categoria": "Acessórios", "qtd": 1}]}, "casa-parente": {"nome": "Casa de parente", "icone": "🏡", "descricao": "Visita à família", "ordem": 8, "sempre": false, "itens": [{"nome": "Roupa confortável para ficar em casa", "categoria": "Roupas", "porPessoa": true, "qtd": 2}, {"nome": "Chinelo ou sandália", "categoria": "Calçados", "porPessoa": true, "qtd": 1}, {"nome": "Toalha de banho (confirmar com o anfitrião)", "categoria": "Higiene", "porPessoa": true, "qtd": 1}, {"nome": "Brinquedos para brincar com os primos", "categoria": "Acessórios", "porPessoa": true, "soCrianca": true, "qtd": 1}, {"nome": "Roupa de cama (confirmar com o anfitrião)", "categoria": "Acessórios", "qtd": 1}, {"nome": "Presente ou lembrança para os anfitriões", "categoria": "Outros", "qtd": 1}, {"nome": "Algo para compartilhar (doce, bebida)", "categoria": "Outros", "qtd": 1}, {"nome": "Jogos para a família", "categoria": "Acessórios", "qtd": 1}]}}, "perfis": {"mulher": {"nome": "Mulher", "icone": "👩", "humano": true, "adulto": true, "ordem": 0, "itens": [{"nome": "Documento com foto (RG ou CNH)", "categoria": "Documentos", "qtd": 1}, {"nome": "Celular e carregador", "categoria": "Eletrônicos", "qtd": 1}, {"nome": "Fone de ouvido", "categoria": "Eletrônicos", "qtd": 1}, {"nome": "Blusa ou camiseta", "categoria": "Roupas", "porDia": 1}, {"nome": "Calcinha", "categoria": "Roupas", "porDia": 1, "extra": 1}, {"nome": "Sutiã", "categoria": "Roupas", "porDia": 0.35}, {"nome": "Meias", "categoria": "Roupas", "porDia": 1}, {"nome": "Calça, saia ou bermuda", "categoria": "Roupas", "porDia": 0.5}, {"nome": "Vestido ou roupa para sair", "categoria": "Roupas", "qtd": 1}, {"nome": "Pijama", "categoria": "Roupas", "qtd": 1}, {"nome": "Tênis ou sapatilha", "categoria": "Calçados", "qtd": 1}, {"nome": "Escova de dente", "categoria": "Higiene", "qtd": 1}, {"nome": "Desodorante", "categoria": "Higiene", "qtd": 1}, {"nome": "Escova de cabelo e elásticos", "categoria": "Higiene", "qtd": 1}, {"nome": "Absorventes", "categoria": "Higiene", "qtd": 1}, {"nome": "Óleo ou hidratante corporal", "categoria": "Higiene", "qtd": 1}, {"nome": "Maquiagem e demaquilante", "categoria": "Higiene", "qtd": 1}, {"nome": "Remédios de uso pessoal", "categoria": "Saúde", "qtd": 1}]}, "homem": {"nome": "Homem", "icone": "👨", "humano": true, "adulto": true, "ordem": 1, "itens": [{"nome": "Documento com foto (RG ou CNH)", "categoria": "Documentos", "qtd": 1}, {"nome": "Celular e carregador", "categoria": "Eletrônicos", "qtd": 1}, {"nome": "Fone de ouvido", "categoria": "Eletrônicos", "qtd": 1}, {"nome": "Camiseta", "categoria": "Roupas", "porDia": 1}, {"nome": "Cueca", "categoria": "Roupas", "porDia": 1, "extra": 1}, {"nome": "Meias", "categoria": "Roupas", "porDia": 1}, {"nome": "Calça ou bermuda", "categoria": "Roupas", "porDia": 0.5}, {"nome": "Camisa para sair", "categoria": "Roupas", "qtd": 1}, {"nome": "Pijama", "categoria": "Roupas", "qtd": 1}, {"nome": "Tênis", "categoria": "Calçados", "qtd": 1}, {"nome": "Escova de dente", "categoria": "Higiene", "qtd": 1}, {"nome": "Desodorante", "categoria": "Higiene", "qtd": 1}, {"nome": "Barbeador ou lâmina", "categoria": "Higiene", "qtd": 1}, {"nome": "Pente", "categoria": "Higiene", "qtd": 1}, {"nome": "Remédios de uso pessoal", "categoria": "Saúde", "qtd": 1}]}, "crianca": {"nome": "Criança", "icone": "🧒", "humano": true, "adulto": false, "ordem": 2, "itens": [{"nome": "Documento (RG ou certidão)", "categoria": "Documentos", "qtd": 1}, {"nome": "Carteira de vacinação", "categoria": "Documentos", "qtd": 1}, {"nome": "Camiseta", "categoria": "Roupas", "porDia": 1}, {"nome": "Roupa íntima", "categoria": "Roupas", "porDia": 1, "extra": 1}, {"nome": "Meias", "categoria": "Roupas", "porDia": 1}, {"nome": "Bermuda ou calça", "categoria": "Roupas", "porDia": 0.5}, {"nome": "Roupa extra (para imprevistos)", "categoria": "Roupas", "qtd": 2}, {"nome": "Pijama", "categoria": "Roupas", "qtd": 2}, {"nome": "Tênis", "categoria": "Calçados", "qtd": 1}, {"nome": "Escova de dente infantil", "categoria": "Higiene", "qtd": 1}, {"nome": "Garrafinha de água", "categoria": "Alimentação", "qtd": 1}, {"nome": "Lanches para o caminho", "categoria": "Alimentação", "qtd": 1}, {"nome": "Brinquedo ou livro favorito", "categoria": "Acessórios", "qtd": 1}, {"nome": "Remédios infantis", "categoria": "Saúde", "qtd": 1}]}, "bebe": {"nome": "Bebê", "icone": "👶", "humano": true, "adulto": false, "ordem": 3, "itens": [{"nome": "Certidão de nascimento", "categoria": "Documentos", "qtd": 1}, {"nome": "Carteira de vacinação", "categoria": "Documentos", "qtd": 1}, {"nome": "Body", "categoria": "Roupas", "porDia": 2}, {"nome": "Calça ou mijão", "categoria": "Roupas", "porDia": 1}, {"nome": "Meias", "categoria": "Roupas", "porDia": 1}, {"nome": "Macacão ou pijama", "categoria": "Roupas", "porDia": 1}, {"nome": "Manta", "categoria": "Acessórios", "qtd": 1}, {"nome": "Fraldas", "categoria": "Higiene", "porDia": 6}, {"nome": "Lenço umedecido", "categoria": "Higiene", "qtd": 2}, {"nome": "Pomada para assaduras", "categoria": "Higiene", "qtd": 1}, {"nome": "Trocador portátil", "categoria": "Higiene", "qtd": 1}, {"nome": "Mamadeira", "categoria": "Alimentação", "qtd": 2}, {"nome": "Fórmula ou papinha (se usar)", "categoria": "Alimentação", "qtd": 1}, {"nome": "Babador", "categoria": "Alimentação", "qtd": 3}, {"nome": "Chupeta", "categoria": "Acessórios", "qtd": 2}, {"nome": "Mordedor ou brinquedo", "categoria": "Acessórios", "qtd": 1}, {"nome": "Carrinho ou sling", "categoria": "Acessórios", "qtd": 1}, {"nome": "Remédios infantis e termômetro", "categoria": "Saúde", "qtd": 1}]}, "cachorro": {"nome": "Cachorro", "icone": "🐶", "humano": false, "adulto": false, "ordem": 4, "itens": [{"nome": "Carteira de vacinação", "categoria": "Documentos", "qtd": 1}, {"nome": "Ração (porções)", "categoria": "Alimentação", "porDia": 2}, {"nome": "Petiscos", "categoria": "Alimentação", "qtd": 1}, {"nome": "Potes de água e comida", "categoria": "Pet", "qtd": 1}, {"nome": "Coleira, guia e plaquinha de identificação", "categoria": "Pet", "qtd": 1}, {"nome": "Saquinhos higiênicos", "categoria": "Pet", "qtd": 1}, {"nome": "Caminha ou manta", "categoria": "Pet", "qtd": 1}, {"nome": "Brinquedo", "categoria": "Pet", "qtd": 1}, {"nome": "Toalha do pet", "categoria": "Pet", "qtd": 1}, {"nome": "Cinto de segurança ou caixa de transporte", "categoria": "Pet", "qtd": 1}, {"nome": "Remédios e antipulgas", "categoria": "Saúde", "qtd": 1}]}, "gato": {"nome": "Gato", "icone": "🐱", "humano": false, "adulto": false, "ordem": 5, "itens": [{"nome": "Carteira de vacinação", "categoria": "Documentos", "qtd": 1}, {"nome": "Ração (porções)", "categoria": "Alimentação", "porDia": 2}, {"nome": "Sachês ou petiscos", "categoria": "Alimentação", "qtd": 1}, {"nome": "Potes de água e comida", "categoria": "Pet", "qtd": 1}, {"nome": "Caixa de transporte", "categoria": "Pet", "qtd": 1}, {"nome": "Caixa de areia portátil", "categoria": "Pet", "qtd": 1}, {"nome": "Areia sanitária", "categoria": "Pet", "qtd": 1}, {"nome": "Pá de areia", "categoria": "Pet", "qtd": 1}, {"nome": "Manta com cheiro de casa", "categoria": "Pet", "qtd": 1}, {"nome": "Brinquedo", "categoria": "Pet", "qtd": 1}, {"nome": "Remédios e antipulgas", "categoria": "Saúde", "qtd": 1}]}}, "climas": {"neve": {"nome": "Neve", "icone": "☃️", "descricao": "Abaixo de 0 °C", "ordem": 0, "itens": [{"nome": "Casaco impermeável", "categoria": "Roupas", "porPessoa": true, "qtd": 1}, {"nome": "Segunda pele", "categoria": "Roupas", "porPessoa": true, "qtd": 2}, {"nome": "Blusa de frio", "categoria": "Roupas", "porPessoa": true, "porDia": 0.5}, {"nome": "Calça térmica ou impermeável", "categoria": "Roupas", "porPessoa": true, "qtd": 2}, {"nome": "Meia térmica", "categoria": "Roupas", "porPessoa": true, "porDia": 0.5}, {"nome": "Gorro", "categoria": "Acessórios", "porPessoa": true, "qtd": 1}, {"nome": "Cachecol", "categoria": "Acessórios", "porPessoa": true, "qtd": 1}, {"nome": "Luvas impermeáveis", "categoria": "Acessórios", "porPessoa": true, "qtd": 1}, {"nome": "Bota impermeável", "categoria": "Calçados", "porPessoa": true, "qtd": 1}, {"nome": "Óculos de sol", "categoria": "Acessórios", "porPessoa": true, "qtd": 1}, {"nome": "Hidratante labial", "categoria": "Higiene", "qtd": 1}, {"nome": "Hidratante corporal", "categoria": "Higiene", "qtd": 1}, {"nome": "Protetor solar", "categoria": "Saúde", "qtd": 1}, {"nome": "Roupinha ou manta extra para o pet", "categoria": "Pet", "pet": true, "qtd": 1}]}, "frio": {"nome": "Frio", "icone": "❄️", "descricao": "Até uns 15 °C", "ordem": 1, "itens": [{"nome": "Casaco pesado", "categoria": "Roupas", "porPessoa": true, "qtd": 1}, {"nome": "Blusa de frio", "categoria": "Roupas", "porPessoa": true, "porDia": 0.5}, {"nome": "Segunda pele", "categoria": "Roupas", "porPessoa": true, "qtd": 2}, {"nome": "Meia grossa", "categoria": "Roupas", "porPessoa": true, "porDia": 0.5}, {"nome": "Gorro", "categoria": "Acessórios", "porPessoa": true, "qtd": 1}, {"nome": "Cachecol", "categoria": "Acessórios", "porPessoa": true, "qtd": 1}, {"nome": "Luvas", "categoria": "Acessórios", "porPessoa": true, "qtd": 1}, {"nome": "Bota", "categoria": "Calçados", "porPessoa": true, "qtd": 1}, {"nome": "Hidratante labial", "categoria": "Higiene", "qtd": 1}, {"nome": "Hidratante corporal", "categoria": "Higiene", "qtd": 1}, {"nome": "Roupinha ou manta extra para o pet", "categoria": "Pet", "pet": true, "qtd": 1}]}, "chuva": {"nome": "Chuva", "icone": "🌧️", "descricao": "Combina com outro clima", "ordem": 2, "itens": [{"nome": "Capa ou jaqueta impermeável", "categoria": "Roupas", "porPessoa": true, "qtd": 1}, {"nome": "Calçado que pode molhar", "categoria": "Calçados", "porPessoa": true, "qtd": 1}, {"nome": "Meias extras", "categoria": "Roupas", "porPessoa": true, "qtd": 2}, {"nome": "Guarda-chuva", "categoria": "Acessórios", "qtd": 2}, {"nome": "Saco plástico para roupa molhada", "categoria": "Acessórios", "qtd": 1}, {"nome": "Toalha extra para o pet", "categoria": "Pet", "pet": true, "qtd": 1}]}, "ameno": {"nome": "Ameno", "icone": "⛅", "descricao": "Entre 15 e 24 °C", "ordem": 3, "itens": [{"nome": "Casaco leve ou jaqueta", "categoria": "Roupas", "porPessoa": true, "qtd": 1}, {"nome": "Blusa de manga longa", "categoria": "Roupas", "porPessoa": true, "qtd": 2}, {"nome": "Guarda-chuva pequeno", "categoria": "Acessórios", "qtd": 1}]}, "quente": {"nome": "Quente", "icone": "☀️", "descricao": "Entre 25 e 32 °C", "ordem": 4, "itens": [{"nome": "Blusa leve para a noite", "categoria": "Roupas", "porPessoa": true, "qtd": 1}, {"nome": "Chapéu ou boné", "categoria": "Acessórios", "porPessoa": true, "qtd": 1}, {"nome": "Óculos de sol", "categoria": "Acessórios", "porPessoa": true, "qtd": 1}, {"nome": "Chinelo ou sandália", "categoria": "Calçados", "porPessoa": true, "qtd": 1}, {"nome": "Garrafa de água", "categoria": "Acessórios", "porPessoa": true, "qtd": 1}, {"nome": "Protetor solar", "categoria": "Saúde", "qtd": 1}, {"nome": "Repelente", "categoria": "Saúde", "qtd": 1}]}, "muito-quente": {"nome": "Muito quente", "icone": "🔥", "descricao": "Acima de 32 °C", "ordem": 5, "itens": [{"nome": "Camiseta extra para trocar no dia", "categoria": "Roupas", "porPessoa": true, "porDia": 0.5}, {"nome": "Blusa leve para a noite ou ar-condicionado", "categoria": "Roupas", "porPessoa": true, "qtd": 1}, {"nome": "Chapéu ou boné", "categoria": "Acessórios", "porPessoa": true, "qtd": 1}, {"nome": "Óculos de sol", "categoria": "Acessórios", "porPessoa": true, "qtd": 1}, {"nome": "Chinelo ou sandália", "categoria": "Calçados", "porPessoa": true, "qtd": 1}, {"nome": "Garrafa de água", "categoria": "Acessórios", "porPessoa": true, "qtd": 1}, {"nome": "Protetor solar", "categoria": "Saúde", "qtd": 1}, {"nome": "Pós-sol", "categoria": "Saúde", "qtd": 1}, {"nome": "Repelente", "categoria": "Saúde", "qtd": 1}, {"nome": "Soro ou sais de reidratação", "categoria": "Saúde", "qtd": 1}, {"nome": "Leque ou ventilador portátil", "categoria": "Acessórios", "qtd": 1}, {"nome": "Pote portátil e água extra para o pet", "categoria": "Pet", "pet": true, "qtd": 1}]}}};
+// Versão independente (fora do Claude): dados só no navegador. A voz fica desligada por enquanto.
+const STANDALONE = true;
+const VOZ = false;
+
+const CATS = [
+  ["Documentos","🪪"],["Roupas","👕"],["Calçados","👟"],["Higiene","🧴"],["Saúde","💊"],
+  ["Eletrônicos","🔌"],["Alimentação","🍎"],["Acessórios","🎒"],["Trabalho","💼"],["Criança","🧸"],["Pet","🐾"],
+  ["Outros","📦"],["Antes de sair","🏠"]
+];
+const CAT_ICON = Object.fromEntries(CATS);
+const CAT_NOME = {"Higiene":"Higiene pessoal"};   // nome exibido (a base guarda o nome curto)
+const nomeCat = c => CAT_NOME[c] || c;
+const CAT_ORDER = Object.fromEntries(CATS.map((c,i)=>[c[0],i]));
+
+const novoForm = () => ({nome:"",destino:"",inicio:"",fim:"",tipos:[],clima:[],quem:{},pessoas:[],mostrarAnon:false,modo:null,passo:0,calMes:(d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"))(new Date())});
+const state = { loading:true, view:"home", tab:"viagens", tripId:null, filtro:"todos",
+  form:novoForm(), confirm:null, agrupar:"pessoa", addPara:"geral",
+  mode:"db", readonly:false, slowNote:false,
+  auth:{tela:"login", nome:"", email:"", erro:"", carregando:false},
+  busca:"", filtroPessoa:"todas", addTxt:"", novaPessoa:{nome:"", perfil:"mulher"} };
+// ---------- pessoas da casa (cadastro fixo, compartilhado pela família) ----------
+let casa = [];   // [{id, nome, perfil}]
+let casaChain = Promise.resolve();
+function salvarCasa(){
+  if(state.mode!=="db"){ try{ localStorage.setItem("casa-demo", JSON.stringify(casa)); }catch(e){} return; }
+  const body={pessoas:clone(casa)};
+  casaChain = casaChain.then(()=>db.doc("casa/pessoas").set(body)).catch(erroEscrita);
+}
+function adicionarPessoa(){
+  const np=state.novaPessoa, nome=(np.nome||"").trim();
+  if(!nome){ toast("Digite o nome da pessoa ou do pet."); return null; }
+  const p={id:"p"+uid().slice(0,8), nome:nome.slice(0,40), perfil:np.perfil||"mulher"};
+  casa.push(p); salvarCasa(); np.nome=""; toast("Adicionado: "+p.nome);
+  return p;
+}
+function pessoaFormHTML(){
+  const np=state.novaPessoa;
+  return `<div class="np"><input id="npNome" value="${esc(np.nome)}" placeholder="Nome (ex.: Anne, Davi, Thor)" maxlength="40" aria-label="Nome">
+    <p class="bloco-l">É…</p><div class="chips">${perfisOrdenados().map(([id,p])=>`<button type="button" class="chip ${np.perfil===id?"on":""}" data-act="npPerfil" data-id="${id}" aria-pressed="${np.perfil===id}">${p.icone} ${esc(p.nome)}</button>`).join("")}</div>
+    <button type="button" class="btn2" data-act="${state.view==="nova"?"addPessoaW":"addPessoa"}">＋ Adicionar</button></div>`;
+}
+// ---------- login de demonstração ----------
+// Nenhuma senha é salva ou enviada: a sessão guarda só nome e e-mail neste navegador.
+let sessao = null;
+try{ sessao = JSON.parse(localStorage.getItem("sessao-demo")||"null"); }catch(e){}
+function salvarSessao(){ try{ sessao ? localStorage.setItem("sessao-demo",JSON.stringify(sessao)) : localStorage.removeItem("sessao-demo"); }catch(e){} }
+let modelos = {};      // id -> modelo (tipo de viagem)
+let perfis = {};       // id -> perfil de viajante (quem vai)
+let climas = {};       // id -> clima (escolhido pelo usuário)
+let trips = {};        // id -> viagem
+let db = null, user = null, dict = null, dictDenied = false, listening = false;
+const dirty = new Set(), deleted = new Set(), timers = {}, chains = {}, versions = {};
+let pendingRender = false;
+const colapsados = new Set();   // recolhidos à mão
+const abertos = new Set();      // completos que a pessoa reabriu à mão
+// Subcategoria completa (tudo marcado) recolhe sozinha, a menos que a pessoa reabra
+const estaFechado = (k, completo) => colapsados.has(k) || (completo && !abertos.has(k));
+
+// ---------- utilidades ----------
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const norm = s => String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().trim().replace(/\s+/g," ");
+const uid = () => (crypto.randomUUID ? crypto.randomUUID() : (Date.now().toString(36)+Math.random().toString(36).slice(2))).replace(/-/g,"").slice(0,20);
+const clone = o => JSON.parse(JSON.stringify(o));
+const hoje = () => { const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); };
+const fmtD = s => s ? s.slice(8,10)+"/"+s.slice(5,7) : "";
+function dias(inicio, fim){
+  if(!inicio || !fim) return 3;
+  const n = Math.round((new Date(fim+"T12:00") - new Date(inicio+"T12:00"))/864e5) + 1;
+  return Math.max(1, Math.min(n, 60));
+}
+function toast(msg, desfazer){
+  const t=document.getElementById("toast"); t.textContent=msg;
+  if(desfazer){ const b=document.createElement("button"); b.textContent="Desfazer"; b.className="undo";
+    b.onclick=()=>{ desfazer(); t.classList.remove("show"); }; t.appendChild(b); }
+  t.classList.toggle("tem-acao", !!desfazer); t.classList.add("show");
+  clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("show"), desfazer?6000:2600);
+}
+function catalogo(){ // nome normalizado -> categoria, a partir da base de modelos
+  const m = {};
+  [...Object.values(perfis),...Object.values(modelos),...Object.values(climas)].forEach(md => (md.itens||[]).forEach(i => m[norm(i.nome)] = i.categoria));
+  return m;
+}
+const modelosOrdenados = () => Object.entries(modelos).sort((a,b)=>(a[1].ordem??99)-(b[1].ordem??99));
+const ordenar = o => Object.entries(o).sort((a,b)=>(a[1].ordem??99)-(b[1].ordem??99));
+const climasOrdenados = () => ordenar(climas);
+const perfisOrdenados = () => Object.entries(perfis).sort((a,b)=>(a[1].ordem??99)-(b[1].ordem??99));
+
+// ---------- regras da lista ----------
+function qtdRegra(i,nDias){ return i.porDia ? Math.max(1, Math.ceil(nDias*i.porDia)+(i.extra||0)) : (i.qtd||1); }
+function regras(){ // nome normalizado -> item da base (para recalcular quantidades)
+  const m={}; [...Object.values(perfis),...Object.values(modelos),...Object.values(climas)].forEach(md=>(md.itens||[]).forEach(i=>{ m[norm(i.nome)]=i; })); return m;
+}
+// O que cada perfil levou nas últimas viagens (até 3), marcado como levado
+function memoriaPorPerfil(){
+  const ult = Object.values(trips).filter(t=>(t.itens||[]).some(i=>i.levado))
+    .sort((a,b)=>(b.inicio||b.criadaEm||"").localeCompare(a.inicio||a.criadaEm||"")).slice(0,3);
+  const mem={};
+  ult.forEach(t=>{ const vm=Object.fromEntries((t.viajantes||[]).map(v=>[v.id,v]));
+    t.itens.forEach(i=>{ if(!i.levado) return; const v=vm[i.quem];
+      const chaves = v ? [v.perfil].concat(v.pessoaId?["p:"+v.pessoaId]:[]) : ["geral"];
+      chaves.forEach(pf=>{ mem[pf]=mem[pf]||new Map();
+        const k=norm(i.nome); if(!mem[pf].has(k)) mem[pf].set(k,{nome:i.nome,categoria:i.categoria,qtd:i.qtd}); }); }); });
+  return mem;
+}
+const temHistorico = () => Object.values(trips).some(t=>(t.itens||[]).some(i=>i.levado));
+// Combina as camadas: perfis (quem vai) + clima + tipo de viagem + histórico
+function gerarItens(o){
+  const nDias=o.dias, viajantes=o.viajantes||[], modo=o.modo||"geral";
+  const out = new Map();
+  const put = (i, quem, origem, qtdFixa) => {
+    const q = qtdFixa || qtdRegra(i,nDias); const k = quem+"|"+norm(i.nome);
+    if(out.has(k)){ out.get(k).qtd = Math.max(out.get(k).qtd, q); return; }
+    out.set(k,{ id:uid(), nome:i.nome, categoria:i.categoria||"Outros", qtd:q, levado:false, origem, quem });
+  };
+  const camadas = [
+    ...modelosOrdenados().filter(([id,md])=>md.sempre || o.tipos.includes(id)).map(([id,md])=>[id,md]),
+    ...climasOrdenados().filter(([id])=>o.clima.includes(id)).map(([id,md])=>["clima:"+id,md])
+  ];
+  const usarGeral = modo!=="historico", usarHist = modo!=="geral";
+  const mem = usarHist ? memoriaPorPerfil() : {}; const rg = usarHist ? regras() : {};
+  const daMemoria = (pf, quem) => { const m=mem[pf]; if(!m||!m.size) return false;
+    m.forEach((i,k)=>{ const r=rg[k]; put(i, quem, "historico", r ? qtdRegra(r,nDias) : (i.qtd||1)); }); return true; };
+  // grupo
+  const geralHist = usarHist && daMemoria("geral","geral");
+  camadas.forEach(([id,md]) => (md.itens||[]).forEach(i=>{
+    if(i.porPessoa||i.pet) return;
+    if(usarGeral || !geralHist || id.startsWith("clima:") || !md.sempre || i.categoria==="Antes de sair") put(i,"geral",id);
+  }));
+  // cada viajante
+  viajantes.forEach(v=>{
+    const p = perfis[v.perfil]; if(!p) return;
+    const veioHist = usarHist && ((v.pessoaId && daMemoria("p:"+v.pessoaId, v.id)) || daMemoria(v.perfil, v.id));
+    if(usarGeral || !veioHist) (p.itens||[]).forEach(i=>put(i, v.id, "perfil:"+v.perfil));
+    camadas.forEach(([id,md]) => (md.itens||[]).forEach(i=>{
+      if(p.humano && i.porPessoa && (!i.soAdulto || p.adulto) && (!i.soCrianca || !p.adulto)) put(i, v.id, id);
+      if(!p.humano && i.pet) put(i, v.id, id);
+    }));
+  });
+  return [...out.values()];
+}
+const opcoesForm = () => { const f=state.form; return {dias:dias(f.inicio,f.fim), tipos:f.tipos, clima:f.clima, modo:f.modo||"geral", viajantes:viajantesDoForm()}; };
+function viajantesDoForm(){
+  const vs=[];
+  casa.filter(p=>state.form.pessoas.includes(p.id) && perfis[p.perfil]).forEach(p=>vs.push({ id:"v"+uid().slice(0,8), perfil:p.perfil, nome:p.nome, pessoaId:p.id }));
+  perfisOrdenados().forEach(([pid,pf])=>{
+    const n = state.form.quem[pid]||0;
+    for(let k=1;k<=n;k++) vs.push({ id:"v"+uid().slice(0,8), perfil:pid, nome: n>1 ? pf.nome+" "+k : pf.nome });
+  });
+  return vs;
+}
+function historico(excluir){
+  const lista = Object.entries(trips).filter(([id])=>id!==excluir).map(([,t])=>t);
+  const m = new Map();
+  lista.forEach(t => (t.itens||[]).forEach(i=>{
+    const k=norm(i.nome);
+    if(!m.has(k)) m.set(k,{nome:i.nome,categoria:i.categoria,levado:0,listado:0,manual:false});
+    const r=m.get(k); r.listado++; if(i.levado) r.levado++; if(i.origem==="manual") r.manual=true;
+  }));
+  return { total: lista.length, itens:[...m.values()] };
+}
+function sugestoesHistorico(listaAtual){
+  const ja = new Set(listaAtual.map(i=>norm(i.nome)));
+  return historico().itens.filter(i=>i.levado>0 && !ja.has(norm(i.nome)))
+    .sort((a,b)=>b.levado-a.levado).slice(0,10);
+}
+
+// ---------- persistência ----------
+function salvar(id){
+  if(state.mode!=="db"){ salvarLocal(); return; }
+  dirty.add(id); versions[id]=(versions[id]||0)+1; const v=versions[id];
+  clearTimeout(timers[id]);
+  timers[id]=setTimeout(()=>{
+    const t = trips[id]; if(!t) return;
+    const body = clone(t);
+    chains[id]=(chains[id]||Promise.resolve()).then(()=>db.collection("viagens").doc(id).set(body))
+      .then(()=>{ if(versions[id]===v) dirty.delete(id); })
+      .catch(e=>{ dirty.delete(id); erroEscrita(e); });
+  },400);
+}
+function apagar(id){
+  delete trips[id]; deleted.add(id); dirty.delete(id); clearTimeout(timers[id]);
+  if(state.mode!=="db"){ salvarLocal(); return; }
+  (chains[id]||Promise.resolve()).then(()=>db.collection("viagens").doc(id).delete()).catch(erroEscrita);
+}
+function erroEscrita(e){
+  const c=e&&e.code;
+  if(c==="invalid_argument"){ state.readonly=true; toast("Você só pode visualizar estas listas."); render(); }
+  else if(c==="quota_exceeded") toast("A base de dados está cheia. Apague viagens antigas.");
+  else toast("Não consegui salvar agora. Tente de novo.");
+}
+function salvarLocal(){ try{ localStorage.setItem("viagens-demo", JSON.stringify(trips)); }catch(e){} }
+function lerLocal(){ try{ return JSON.parse(localStorage.getItem("viagens-demo")||"{}")||{}; }catch(e){ return {}; } }
+
+// ---------- ações ----------
+function criarViagem(){
+  const f=state.form; const o=opcoesForm(); const viajantes=o.viajantes;
+  const itens = gerarItens(o);
+  const id=uid();
+  trips[id]={ nome:f.nome.trim()||("Viagem para "+(f.destino.trim()||"…")), destino:f.destino.trim(),
+    inicio:f.inicio, fim:f.fim, tipos:[...f.tipos], clima:[...f.clima], modo:o.modo, viajantes, criadaEm:new Date().toISOString(), itens };
+  salvar(id);
+  state.form=novoForm();
+  state.view="viagem"; state.tripId=id; state.filtro="todos"; state.addPara="geral"; state.agrupar="pessoa";
+  render(); window.scrollTo(0,0);
+  toast(itens.length+" itens na lista. Boa viagem!");
+}
+const NUMS={um:1,uma:1,dois:2,duas:2,"tres":3,quatro:4,cinco:5,seis:6,sete:7,oito:8,nove:9,dez:10};
+// ---------- comandos (voz ou texto) ----------
+// "peguei o carregador", "marcar protetor e chinelo" -> marca como levado
+// "desmarcar toalha" -> volta para "faltam"; qualquer outra frase -> adiciona itens
+const RX_MARCAR = /^(j[aá]\s+)?(marc\w*|conclu\w*|peguei|coloquei|guardei|separei|botei|levei|check|feito|ok)\s+/i;
+const RX_DESMARCAR = /^(desmarc\w*|tirar? (o )?check|n[aã]o peguei|faltou|falta)\s+/i;
+const STOP = new Set(["de","do","da","dos","das","o","a","os","as","um","uma","uns","umas","meu","minha","meus","minhas","para","pra","com","no","na","nos","nas","ja","tambem"]);
+const raiz = w => w.length>4 && /[rzs]es$/.test(w) ? w.slice(0,-2) : w.length>3 && w.endsWith("s") ? w.slice(0,-1) : w;
+const palavras = s => norm(s).split(/[^a-z0-9]+/).filter(w=>w && !STOP.has(w)).map(raiz);
+function procurarItens(t, frase){
+  const alvo = norm(frase), pw = palavras(frase); if(!pw.length) return [];
+  let cand = t.itens;
+  const fp = state.filtroPessoa, vids=(t.viajantes||[]).map(v=>v.id);
+  if(fp!=="todas" && (fp==="geral"||vids.includes(fp))) cand = cand.filter(i=>(vids.includes(i.quem)?i.quem:"geral")===fp);
+  const exato = cand.filter(i=>norm(i.nome)===alvo || palavras(i.nome).join(" ")===pw.join(" "));
+  if(exato.length) return exato;
+  return cand.filter(i=>{ const iw=new Set(palavras(i.nome)); return pw.every(w=>iw.has(w) || [...iw].some(x=>x.startsWith(w)&&w.length>=4)); });
+}
+function processarComando(texto, voz){
+  const t=trips[state.tripId]; if(!t||!texto||!texto.trim()) return;
+  const pre = voz ? "🎤 " : "";
+  let s = texto.trim().replace(/[.!?]+$/,"");
+  const desm = RX_DESMARCAR.test(s), marc = !desm && RX_MARCAR.test(s);
+  if(!desm && !marc){ const add=adicionarTexto(s); if(add.length) toast(pre+"Adicionado: "+add.join(", ")); return; }
+  s = s.replace(desm?RX_DESMARCAR:RX_MARCAR,"").replace(/\s+(na|da)\s+(lista|mala)$/i,"").replace(/^como (levado|feito)\s+/i,"");
+  const partes = s.split(/\s*,\s*|\s+e\s+|\s*;\s*/i).map(p=>p.trim()).filter(Boolean);
+  const mudou=[], naoAchou=[];
+  const vmap = Object.fromEntries((t.viajantes||[]).map(v=>[v.id,v.nome]));
+  partes.forEach(p=>{
+    const achados = procurarItens(t,p).filter(i=>i.levado===desm);
+    if(!achados.length){ naoAchou.push(p.replace(/^(o|a|os|as|um|uma|meu|minha|meus|minhas)\s+/i,"")); return; }
+    achados.forEach(i=>{ mudou.push({id:i.id, antes:i.levado, nome:i.nome+(vmap[i.quem]&&achados.length>1?" ("+vmap[i.quem]+")":"")}); i.levado=!desm; });
+  });
+  if(mudou.length){
+    salvar(state.tripId); render();
+    const tid=state.tripId;
+    toast(pre+(desm?"Desmarcado: ":"✓ Na mala: ")+mudou.map(m=>m.nome).join(", ")+(naoAchou.length?` · Não achei: ${naoAchou.join(", ")}`:""), ()=>{
+      const tt=trips[tid]; if(!tt) return; mudou.forEach(m=>{ const i=tt.itens.find(x=>x.id===m.id); if(i) i.levado=m.antes; }); salvar(tid); render(); });
+  } else toast(pre+`Não achei na lista: ${naoAchou.join(", ")}`);
+}
+function adicionarTexto(texto){
+  const t=trips[state.tripId]; if(!t||!texto) return [];
+  let s = texto.trim().replace(/[.!?]+$/,"");
+  s = s.replace(/^(por favor[, ]*)?(adicion\w*|coloc\w*|inclu\w*|p[oô]e|bota|levar|leva|preciso (de )?levar)\s+/i,"");
+  s = s.replace(/\s+(na|à|a)\s+(lista|mala)$/i,"");
+  const partes = s.split(/\s*,\s*|\s+e\s+|\s*;\s*/i).map(p=>p.trim()).filter(Boolean);
+  const cat = catalogo(); const add=[];
+  partes.forEach(p=>{
+    let qtd=1; const m=p.match(/^(\d+|\S+)\s+(.+)$/);
+    if(m){ const w=norm(m[1]); if(/^\d+$/.test(w)){qtd=Math.min(99,+w);p=m[2];} else if(NUMS[w]){qtd=NUMS[w];p=m[2];} }
+    p=p.charAt(0).toUpperCase()+p.slice(1);
+    const quem = (state.addPara==="geral" || (t.viajantes||[]).some(v=>v.id===state.addPara)) ? state.addPara : "geral";
+    const ex=t.itens.find(i=>norm(i.nome)===norm(p) && (i.quem||"geral")===quem);
+    if(ex){ ex.qtd = Math.max(ex.qtd, qtd); ex.levado=false; add.push(p); return; }
+    const h=historico(state.tripId).itens.find(x=>norm(x.nome)===norm(p));
+    t.itens.push({id:uid(),nome:p,categoria:cat[norm(p)]||(h&&h.categoria)||"Outros",qtd,levado:false,origem:"manual",quem});
+    add.push(p);
+  });
+  if(add.length){ salvar(state.tripId); render(); }
+  return add;
+}
+
+// ---------- telas ----------
+function bannerHTML(){
+  if(state.mode==="demo") return STANDALONE ? `<div class="banner">🧪 Versão de demonstração: suas viagens ficam salvas só neste navegador.</div>`
+    : `<div class="banner">Modo demonstração: as listas ficam só neste navegador. Abra pelo link do artefato no Claude para usar a base de dados compartilhada.</div>`;
+  if(state.readonly) return `<div class="banner">Você tem acesso só para visualizar. Peça a quem compartilhou para te dar acesso de colaborador.</div>`;
+  if(state.slowNote) return `<div class="banner">Ainda não consegui falar com a base de dados. Os dados podem estar desatualizados.</div>`;
+  return "";
+}
+function progresso(t){ const tot=t.itens.length, ok=t.itens.filter(i=>i.levado).length; return {tot,ok,pc: tot?Math.round(ok*100/tot):0}; }
+function iconeViagem(t){ const k=(t.tipos||[])[0]; return (k&&modelos[k]&&modelos[k].icone)||"🧳"; }
+const iconePerfil = v => (perfis[v.perfil]&&perfis[v.perfil].icone)||"🙂";
+function cardViagem(id,t,past){
+  const p=progresso(t);
+  const datas = t.inicio ? fmtD(t.inicio)+(t.fim?" – "+fmtD(t.fim):"") : "sem data";
+  return `<button class="card trip ${past?"past":""}" data-act="abrir" data-id="${id}">
+    <div class="ic">${iconeViagem(t)}</div>
+    <div class="bd"><div class="nm">${esc(t.nome)}</div>
+      <div class="mt">${t.destino?"📍 "+esc(t.destino)+" · ":""}${datas}${(t.clima||[]).length?" · "+t.clima.map(c=>(climas[c]&&climas[c].icone)||"").join(""):""}${(t.viajantes||[]).length?" · "+t.viajantes.map(iconePerfil).join(""):""}</div>
+      <div class="bar"><i style="width:${p.pc}%"></i></div></div>
+    <div class="pc">${p.ok}/${p.tot}</div></button>`;
+}
+const ICON_LUA='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+const ICON_SOL='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+const temaAtual = () => document.documentElement.dataset.theme==="dark" ? "dark" : "light";
+const botaoTema = () => `<button class="theme" data-act="tema" aria-label="${temaAtual()==="dark"?"Usar tema claro":"Usar tema escuro"}" title="${temaAtual()==="dark"?"Tema claro":"Tema escuro"}">${temaAtual()==="dark"?ICON_SOL:ICON_LUA}</button>`;
+function homeView(){
+  let h = `<header class="top"><div><p class="eyebrow">${sessao&&sessao.nome?"Minhas viagens":"AllSet · Viagens"}</p><h1>${sessao&&sessao.nome?"Olá, "+esc(sessao.nome.split(" ")[0])+"!":"Minhas viagens"}</h1></div><div class="top-acts">${botaoTema()}<button class="avatar" data-act="conta" aria-label="Minha conta">${esc(iniciais(sessao&&sessao.nome))}</button></div></header>${bannerHTML()}
+  <nav class="tabs"><button data-act="tab" data-tab="viagens" class="${state.tab==="viagens"?"on":""}">Viagens</button>
+  <button data-act="tab" data-tab="historico" class="${state.tab==="historico"?"on":""}">Histórico</button>
+  <button data-act="tab" data-tab="casa" class="${state.tab==="casa"?"on":""}">Casa</button></nav>`;
+  h += state.tab==="viagens" ? listaViagens() : state.tab==="casa" ? casaView() : historicoView();
+  if(!state.readonly && state.tab==="viagens") h += `<button class="fab" data-act="nova">＋ Nova viagem</button>`;
+  return h;
+}
+function casaView(){
+  let h = `<p class="note" style="margin:0 4px 14px">Pessoas e pets da casa. Eles aparecem no “Quem vai?” das novas viagens, e o histórico de cada um fica salvo.</p>`;
+  h += casa.length ? `<div class="card list">`+casa.map(p=>{ const pf=perfis[p.perfil]||{};
+      return `<div class="it pessoa-it"><span class="e">${esc(pf.icone||"🙂")}</span><span class="nm"><b>${esc(p.nome)}</b><small class="dono">${esc(pf.nome||"")}</small></span>
+        ${state.readonly?"":`<button class="ren" data-act="renomearPessoa" data-id="${p.id}" aria-label="Renomear ${esc(p.nome)}">✎</button><button class="del" data-act="removerPessoa" data-id="${p.id}" aria-label="Remover ${esc(p.nome)}">×</button>`}</div>`; }).join("")+`</div>`
+    : `<div class="empty" style="padding:24px"><div class="big">🏠</div><b>Ninguém cadastrado ainda</b>Adicione quem costuma viajar com você.</div>`;
+  if(!state.readonly) h += `<div class="sec-t">Adicionar pessoa ou pet</div><div class="card bloco">${pessoaFormHTML()}</div>`;
+  return h;
+}
+function listaViagens(){
+  const all = Object.entries(trips).sort((a,b)=>(a[1].inicio||"9").localeCompare(b[1].inicio||"9"));
+  if(!all.length) return `<div class="empty"><div class="big">🧳</div><b>Nenhuma viagem ainda</b>Crie uma viagem, escolha o tipo e a lista já vem pronta, com base no que costuma ser levado.</div>`;
+  const h0=hoje();
+  const prox = all.filter(([,t])=>!t.fim || t.fim>=h0), ant = all.filter(([,t])=>t.fim && t.fim<h0).reverse();
+  let h="";
+  if(prox.length) h+=`<div class="sec-t">Próximas</div>`+prox.map(([id,t])=>cardViagem(id,t,false)).join("");
+  if(ant.length) h+=`<div class="sec-t">Anteriores</div>`+ant.map(([id,t])=>cardViagem(id,t,true)).join("");
+  return h;
+}
+function historicoView(){
+  const hs = historico(); const total=hs.total;
+  if(!total) return `<div class="empty"><div class="big">📊</div><b>Seu histórico aparece aqui</b>Depois das primeiras viagens, você vê o que sempre leva e o app passa a sugerir esses itens.</div>`;
+  const levados = Object.values(trips).reduce((s,t)=>s+t.itens.filter(i=>i.levado).length,0);
+  const media = Math.round(Object.values(trips).reduce((s,t)=>s+t.itens.length,0)/total);
+  const top = hs.itens.filter(i=>i.levado>0).sort((a,b)=>b.levado-a.levado||a.nome.localeCompare(b.nome)).slice(0,12);
+  const meus = hs.itens.filter(i=>i.manual).sort((a,b)=>b.listado-a.listado).slice(0,12);
+  let h = `<div class="stats"><div class="card stat"><b>${total}</b><span>viagens</span></div>
+    <div class="card stat"><b>${levados}</b><span>itens levados</span></div>
+    <div class="card stat"><b>${media}</b><span>itens por viagem</span></div></div>`;
+  h += `<div class="sec-t">O que você mais leva</div>`;
+  h += top.length ? `<div class="card rank">`+top.map(i=>`<div class="rk"><span>${CAT_ICON[i.categoria]||"📦"}</span>
+      <div>${esc(i.nome)}<div class="bar"><i style="width:${Math.round(i.levado*100/total)}%"></i></div></div>
+      <small>${i.levado} de ${total}</small></div>`).join("")+`</div>`
+    : `<p class="note">Marque os itens como levados nas suas viagens para montar este ranking.</p>`;
+  if(meus.length){
+    h += `<div class="sec-t">Itens que você incluiu por conta própria</div><div class="chips">`+
+      meus.map(i=>`<span class="chip">${esc(i.nome)} <small>×${i.listado}</small></span>`).join("")+`</div>
+      <p class="note">Esses itens não estão nas listas sugeridas. Eles aparecem como sugestão “do seu histórico” quando você cria uma nova viagem.</p>`;
+  }
+  return h;
+}
+const PASSOS = ["destino","datas","quem","clima","tipo","modo","revisao"];
+function novaView(){
+  const f=state.form; const passo=PASSOS[f.passo]; const n=dias(f.inicio,f.fim);
+  const total=PASSOS.length;
+  let h = `<header class="hdr"><button class="back" data-act="${f.passo?"voltarPasso":"home"}" aria-label="Voltar">←</button>
+    <div class="t"><p class="eyebrow" style="margin:0">Passo ${f.passo+1} de ${total}</p></div>
+    <button class="x" data-act="home" aria-label="Cancelar">Cancelar</button></header>
+    <div class="dots">${PASSOS.map((_,i)=>`<i class="${i<=f.passo?"on":""}"></i>`).join("")}</div>
+    <form id="fNova" autocomplete="off" class="wiz">`;
+  let ok = true, pular = false;
+  if(passo==="destino"){
+    h += `<h2 class="q">Para onde você vai?</h2>
+      <label>Destino<input name="destino" value="${esc(f.destino)}" placeholder="Ex.: Gramado, RS" autofocus></label>
+      <label>Nome da viagem <span class="opt">(opcional)</span><input name="nome" value="${esc(f.nome)}" placeholder="${esc(f.destino?"Viagem para "+f.destino:"Ex.: Férias de julho")}"></label>`;
+  }
+  if(passo==="datas"){
+    h += `<h2 class="q">Quando?</h2><p class="sub">Toque na data de ida e depois na de volta.</p>${calendarioHTML()}`;
+    ok = !(f.inicio && !f.fim);
+    pular = true;
+  }
+  if(passo==="quem"){
+    const anon = Object.values(f.quem).reduce((a,b)=>a+b,0);
+    f.pessoas = f.pessoas.filter(id=>casa.some(p=>p.id===id));
+    ok = anon + f.pessoas.length > 0;
+    h += `<h2 class="q">Quem vai?</h2>`;
+    if(casa.length){
+      h += `<div class="sub-linha"><p class="sub" style="margin:0">Toque em quem vai nesta viagem.</p>
+        <button type="button" class="lite" data-act="todosCasa">${f.pessoas.length===casa.length?"Limpar":"Todos"}</button></div>
+        <div class="quem-casa">`+casa.map(p=>{ const pf=perfis[p.perfil]||{}; const on=f.pessoas.includes(p.id);
+          return `<button type="button" class="pessoa ${on?"on":""}" data-act="pessoaW" data-id="${p.id}" role="checkbox" aria-checked="${on}">
+            <span class="e">${esc(pf.icone||"🙂")}</span><span class="pn"><b>${esc(p.nome)}</b><small>${esc(pf.nome||"")}</small></span><span class="tick" aria-hidden="true"></span></button>`; }).join("")+`</div>`;
+    } else {
+      h += `<p class="sub">Cadastre as pessoas e pets da casa uma vez só. Nas próximas viagens, é só tocar em quem vai.</p>`;
+    }
+    h += `<details class="dobra" ${casa.length?"":"open"}><summary>＋ Cadastrar pessoa ou pet</summary>${pessoaFormHTML()}</details>
+      <details class="dobra" ${f.mostrarAnon||anon?"open":""}><summary>👥 Convidados sem cadastro ${anon?`<span class="badge">${anon}</span>`:""}</summary>
+      <p class="note" style="margin:0 0 10px">Para quem vai só desta vez, sem salvar o nome.</p><div class="quem">`+
+      perfisOrdenados().map(([id,p])=>{ const q=f.quem[id]||0; return `<div class="pf ${q?"on":""}">
+      <span class="e">${esc(p.icone)}</span><b>${esc(p.nome)}</b>
+      <div class="qty"><button type="button" data-act="quem" data-id="${id}" data-d="-1" aria-label="Menos" ${q?"":"disabled"}>−</button><span>${q}</span><button type="button" data-act="quem" data-id="${id}" data-d="1" aria-label="Mais">+</button></div></div>`; }).join("")+`</div></details>`;
+  }
+  if(passo==="clima"){
+    h += `<h2 class="q">Como vai estar o clima?</h2>
+      <p class="sub"><span class="multi-tag">✓✓ Pode marcar mais de um</span><br>Ex.: dias quentes com chance de chuva → marque <b>Quente</b> e <b>Chuva</b>.</p><div class="types">`+
+      climasOrdenados().map(([id,c])=>`<button type="button" class="type multi ${f.clima.includes(id)?"on":""}" data-act="clima" data-id="${id}" role="checkbox" aria-checked="${f.clima.includes(id)}">
+      <span class="e">${esc(c.icone)}</span><span><b>${esc(c.nome)}</b><small>${esc(c.descricao||"")}</small></span><span class="tick" aria-hidden="true"></span></button>`).join("")+`</div>
+      <p class="selecao">${f.clima.length?`Selecionado${f.clima.length>1?"s":""}: <b>${f.clima.map(c=>climas[c]&&esc(climas[c].nome)).filter(Boolean).join(" + ")}</b>`:"Nenhum selecionado"}</p>`;
+    pular = true;
+  }
+  if(passo==="tipo"){
+    h += `<h2 class="q">Que tipo de viagem?</h2><p class="sub"><span class="multi-tag">✓✓ Pode marcar mais de um</span><br>Opcional. Ex.: Praia + Trabalho.</p><div class="types">`+
+      modelosOrdenados().filter(([,m])=>!m.sempre).map(([id,m])=>`<button type="button" class="type multi ${f.tipos.includes(id)?"on":""}" data-act="tipo" data-id="${id}" role="checkbox" aria-checked="${f.tipos.includes(id)}">
+      <span class="e">${esc(m.icone)}</span><span><b>${esc(m.nome)}</b><small>${esc(m.descricao||"")}</small></span><span class="tick" aria-hidden="true"></span></button>`).join("")+`</div>`;
+    pular = true;
+  }
+  if(passo==="modo"){
+    const hist = temHistorico();
+    if(!f.modo) f.modo = hist ? "ambas" : "geral";
+    const op = (id,ic,t,d,dis) => `<button type="button" class="opt-card ${f.modo===id?"on":""}" data-act="modo" data-id="${id}" ${dis?"disabled":""}>
+      <span class="e">${ic}</span><span><b>${t}</b><small>${d}</small></span></button>`;
+    h += `<h2 class="q">Como montar a lista?</h2>`+
+      op("geral","💡","Sugestões do app","Listas básicas de cada pessoa, do clima e do tipo de viagem.")+
+      op("historico","↺","Minhas últimas viagens",hist?"O que vocês levaram nas últimas viagens, mais os itens do clima e do tipo desta.":"Disponível depois que você marcar itens como levados em uma viagem.",!hist)+
+      op("ambas","✨","As duas juntas",hist?"Sugestões do app e o que vocês costumam levar.":"Disponível depois da primeira viagem.",!hist);
+  }
+  if(passo==="revisao"){
+    const o=opcoesForm(); const itens=gerarItens(o);
+    const vs = casa.filter(p=>f.pessoas.includes(p.id)).map(p=>`${(perfis[p.perfil]||{}).icone||""} ${esc(p.nome)}`)
+      .concat(perfisOrdenados().filter(([id])=>f.quem[id]).map(([id,p])=>`${p.icone} ${f.quem[id]>1?f.quem[id]+"× ":""}${esc(p.nome)}`));
+    const cl = f.clima.map(c=>climas[c]&&`${climas[c].icone} ${esc(climas[c].nome)}`).filter(Boolean);
+    const tp = f.tipos.map(t=>modelos[t]&&`${modelos[t].icone} ${esc(modelos[t].nome)}`).filter(Boolean);
+    const modoTxt={geral:"Sugestões do app",historico:"Minhas últimas viagens",ambas:"Sugestões + últimas viagens"}[o.modo];
+    const lin=(k,v,p)=>`<div class="rv"><span>${k}</span><b>${v}</b><button type="button" data-act="irPasso" data-p="${p}">Editar</button></div>`;
+    h += `<h2 class="q">Tudo certo?</h2><div class="card rvbox">
+      ${lin("Destino",esc(f.destino||"—"),0)}
+      ${lin("Datas",f.inicio?`${fmtD(f.inicio)}${f.fim?" – "+fmtD(f.fim):""} · ${o.dias} ${o.dias===1?"dia":"dias"}`:"Sem data (3 dias)",1)}
+      ${lin("Quem vai",vs.join(", ")||"—",2)}
+      ${lin("Clima",cl.join(", ")||"Não informado",3)}
+      ${lin("Tipo",tp.join(", ")||"—",4)}
+      ${lin("Lista",modoTxt,5)}</div>
+      <div class="preview">🧳 <b>${itens.length} itens</b> serão sugeridos. Depois você pode tirar, incluir e ajustar quantidades.</div>`;
+  }
+  h += `<div class="wiz-nav">${passo==="revisao"
+      ? `<button type="submit" class="primary" ${state.readonly?"disabled":""}>Criar lista</button>`
+      : `<button type="submit" class="primary" ${ok?"":"disabled"}>${passo==="datas"&&f.inicio&&!f.fim?"Escolha a volta":pular&&!temValor(passo)?"Pular":"Continuar"}</button>`}</div></form>`;
+  return h;
+}
+// ---------- calendário de ida e volta (como nos apps de passagem) ----------
+const MESES=["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
+const SEM_CURTA=["dom","seg","ter","qua","qui","sex","sáb"];
+const ymd = (y,m,d) => y+"-"+String(m+1).padStart(2,"0")+"-"+String(d).padStart(2,"0");
+function dataLonga(s){ if(!s) return ""; const [y,m,d]=s.split("-").map(Number); const dt=new Date(y,m-1,d);
+  return `${SEM_CURTA[dt.getDay()]}, ${d} ${MESES[m-1].slice(0,3)}`; }
+function calendarioHTML(){
+  const f=state.form, h0=hoje();
+  const [y,m]=f.calMes.split("-").map(Number); const mi=m-1;
+  const primeiro=new Date(y,mi,1).getDay(), total=new Date(y,mi+1,0).getDate();
+  const podeVoltar = f.calMes > h0.slice(0,7);
+  const n = dias(f.inicio,f.fim);
+  let cells="";
+  for(let i=0;i<primeiro;i++) cells+=`<div class="c"></div>`;
+  for(let d=1; d<=total; d++){
+    const s=ymd(y,mi,d), passado = s<h0;
+    const ini = s===f.inicio, fim = s===f.fim, entre = f.inicio&&f.fim && s>f.inicio && s<f.fim;
+    const cls = [ini&&"ini", fim&&"fim", entre&&"entre", (ini&&f.fim&&f.fim!==f.inicio)&&"faixa-d", (fim&&f.inicio!==f.fim)&&"faixa-e", s===h0&&"hoje"].filter(Boolean).join(" ");
+    cells+=`<div class="c ${cls}"><button type="button" class="n" data-act="dia" data-d="${s}" ${passado?"disabled":""} aria-label="${d} de ${MESES[mi]}${ini?", ida":""}${fim?", volta":""}" aria-pressed="${ini||fim}">${d}</button></div>`;
+  }
+  const resumo = (rot, val, ativo) => `<div class="cal-r ${ativo?"ativo":""} ${val?"tem":""}"><small>${rot}</small><b>${val?dataLonga(val):"Escolher"}</b></div>`;
+  const esperandoVolta = f.inicio && !f.fim;
+  return `<div class="cal-resumo">${resumo("Ida",f.inicio,!f.inicio)}<span class="cal-seta">→</span>${resumo("Volta",f.fim,esperandoVolta)}</div>
+    <div class="card cal">
+      <div class="cal-top"><button type="button" class="cal-nav" data-act="mes" data-delta="-1" ${podeVoltar?"":"disabled"} aria-label="Mês anterior">‹</button>
+        <b>${MESES[mi]} ${y}</b><button type="button" class="cal-nav" data-act="mes" data-delta="1" aria-label="Próximo mês">›</button></div>
+      <div class="cal-sem">${["D","S","T","Q","Q","S","S"].map(x=>`<span>${x}</span>`).join("")}</div>
+      <div class="cal-grid">${cells}</div>
+    </div>
+    <div class="cal-info"><span>${f.inicio&&f.fim ? `<b>${n} ${n===1?"dia":"dias"}</b> · ${n-1} ${n-1===1?"noite":"noites"}` : esperandoVolta ? "Agora toque na data de volta." : "Sem as datas, considero 3 dias."}</span>
+      ${f.inicio?`<button type="button" data-act="limparDatas">Limpar</button>`:""}</div>`;
+}
+function escolherDia(s){
+  const f=state.form;
+  if(!f.inicio || (f.inicio && f.fim) || s<f.inicio){ f.inicio=s; f.fim=""; }
+  else f.fim=s;   // mesmo dia = bate-volta (1 dia)
+  render();
+}
+function temValor(p){ const f=state.form; return p==="datas"?!!(f.inicio||f.fim):p==="clima"?f.clima.length>0:p==="tipo"?f.tipos.length>0:true; }
+function atualizarBotaoPasso(){
+  const b=document.querySelector(".wiz-nav .primary"); const p=PASSOS[state.form.passo];
+  if(b && p!=="revisao" && ["datas"].includes(p)) b.textContent = temValor(p)?"Continuar":"Pular";
+  const d=document.getElementById("diasTxt"); if(d){ const n=dias(state.form.inicio,state.form.fim);
+    d.textContent = state.form.inicio&&state.form.fim ? `${n} ${n===1?"dia":"dias"} de viagem.` : "Sem as datas, considero 3 dias."; }
+}
+function linhaItem(i, ro, dono){
+  return `<div class="it ${i.levado?"done":""}">
+    <button class="chk" data-act="toggle" data-id="${i.id}" aria-label="Marcar ${esc(i.nome)}" ${ro?"disabled":""}>${i.levado?"✓":""}</button>
+    <span class="nm" data-act="toggle" data-id="${i.id}">${esc(i.nome)}${i.origem==="historico"?'<span class="tag">↺</span>':""}${dono?`<small class="dono">${esc(dono)}</small>`:""}</span>
+    ${ro?`<span class="qty"><span>${i.qtd}</span></span>`:`<div class="qty"><button data-act="qty" data-d="-1" data-id="${i.id}" aria-label="Menos">−</button><span>${i.qtd}</span><button data-act="qty" data-d="1" data-id="${i.id}" aria-label="Mais">+</button></div>
+    <button class="del" data-act="del" data-id="${i.id}" aria-label="Remover">×</button>`}</div>`;
+}
+const porCat = (a,b)=>(CAT_ORDER[a.categoria]??10)-(CAT_ORDER[b.categoria]??10);
+function viagemView(id){
+  const t=trips[id]; const p=progresso(t); const n=dias(t.inicio,t.fim);
+  const vs = t.viajantes||[]; const vmap = Object.fromEntries(vs.map(v=>[v.id,v]));
+  const datas = t.inicio ? fmtD(t.inicio)+(t.fim?" – "+fmtD(t.fim):"")+` · ${n} ${n===1?"dia":"dias"}` : "";
+  const ro=state.readonly;
+  let h = `<header class="hdr"><button class="back" data-act="home" aria-label="Voltar">←</button>
+    <div class="t"><h2>${esc(t.nome)}</h2><p>${t.destino?"📍 "+esc(t.destino):""}${t.destino&&datas?" · ":""}${datas}</p></div></header>${bannerHTML()}
+  <div class="card prog ${p.tot&&p.ok===p.tot?"done":""}"><div class="row"><div class="big">${p.tot&&p.ok===p.tot?"Mala pronta! ✨":p.pc+"%"}</div>
+    <span>${p.ok} de ${p.tot} itens</span></div><div class="bar"><i style="width:${p.pc}%"></i></div></div>`;
+  if(!ro){
+    const para = vmap[state.addPara] ? state.addPara : "geral";
+    h += `<section class="card bloco"><h3 class="bloco-t">＋ Adicionar item</h3>
+      <form class="add" id="fAdd" autocomplete="off"><input id="addInput" value="${esc(state.addTxt)}" placeholder="Ex.: 2 toalhas, guarda-chuva" enterkeyhint="done" aria-label="Novo item">
+      ${dict&&!dictDenied?`<button type="button" class="mic ${listening?"live":""}" id="mic" data-act="mic" aria-label="Adicionar por voz">🎤</button>`:""}
+      <button type="submit" class="go" aria-label="Adicionar">＋</button></form>
+      ${vs.length?`<p class="bloco-l">Vai para a lista de:</p><div class="chips rolar" role="radiogroup" aria-label="Vai para a lista de">${[["geral","🧳","Todos"]].concat(vs.map(v=>[v.id,iconePerfil(v),v.nome])).map(([vid,ic,nm])=>`<button type="button" role="radio" aria-checked="${para===vid}" class="chip ${para===vid?"on":""}" data-act="para" data-id="${vid}">${ic} ${esc(nm)}</button>`).join("")}</div>`:""}
+      <p class="hint ${listening?"live":""}" id="hint">${listening?"Ouvindo… ex.: “protetor solar e chinelo” ou “peguei o carregador”":(dict&&!dictDenied?"🎤 Diga os itens para incluir, ou “peguei…” para marcar como levado.":"Separe itens por vírgula. Comece com “peguei” para marcar como levado.")}</p></section>`;
+  }
+  const faltam = t.itens.filter(i=>!i.levado).length;
+  const agr = vs.length ? state.agrupar : "categoria";
+  const fp = (state.filtroPessoa==="geral" || vmap[state.filtroPessoa]) ? state.filtroPessoa : "todas";
+  const quemDeItem = i => vmap[i.quem] ? i.quem : "geral";
+  h += `<section class="bloco-lista"><div class="lista-top"><h3 class="bloco-t">📋 Sua lista</h3>
+      ${vs.length?`<button data-act="agrupar" class="lite">Agrupar ${agr==="pessoa"?"por pessoa":"por categoria"} ⇄</button>`:""}</div>
+    <div class="busca"><span aria-hidden="true">🔍</span><input id="busca" type="search" value="${esc(state.busca)}" placeholder="Buscar item na lista" aria-label="Buscar item na lista" enterkeyhint="search">
+      ${state.busca?`<button data-act="limparBusca" aria-label="Limpar busca">×</button>`:""}</div>
+    <div class="filtros"><div class="seg"><button data-act="filtro" data-f="todos" class="${state.filtro==="todos"?"on":""}">Todos</button>
+      <button data-act="filtro" data-f="faltam" class="${state.filtro==="faltam"?"on":""}">Faltam (${faltam})</button></div></div>
+    ${vs.length?`<div class="chips rolar filtro-p" aria-label="Filtrar por pessoa">${[["todas","👥","Todas as pessoas"]].concat(vs.map(v=>[v.id,iconePerfil(v),v.nome]),[["geral","🧳","Para todos"]]).map(([vid,ic,nm])=>`<button class="chip fchip ${fp===vid?"on":""}" data-act="filtroPessoa" data-id="${vid}" aria-pressed="${fp===vid}">${ic} ${esc(nm)}</button>`).join("")}</div>`:""}
+  </section>`;
+  const bq = norm(state.busca);
+  const vis = t.itens.filter(i=>(state.filtro==="todos"||!i.levado) && (fp==="todas" || quemDeItem(i)===fp) && (!bq || norm(i.nome).includes(bq)));
+  if(!vis.length) h += `<div class="cheer">${bq?`Nenhum item com “${esc(state.busca)}”.`:!t.itens.length?"Lista vazia. Adicione itens acima.":state.filtro==="faltam"?"Nada faltando aqui. Tudo na mala! 🎉":"Nenhum item para essa pessoa."}</div>`;
+  const secao = (titulo, all, mostrar, extra, dono, chave, auto) => { if(!mostrar.length) return "";
+    const k = id+"|"+(chave||titulo); const ok = all.filter(i=>i.levado).length, completo = all.length>0 && ok===all.length;
+    const fechado = state.busca ? false : auto ? estaFechado(k, completo) : colapsados.has(k);
+    return `<section class="grp ${auto&&completo?"completo":""}"><h3><span class="tt"><button class="fold" data-act="colapsar" data-k="${esc(k)}" data-c="${auto&&completo?1:0}" aria-expanded="${!fechado}">${fechado?"▸":"▾"} ${titulo}</button>${extra||""}</span> <span>${auto&&completo?"✓ ":""}${ok}/${all.length}</span></h3>`+
+      (fechado ? "" : `<div class="card list">`+linhasComSub(mostrar, all, dono, k)+`</div>`)+`</section>`; };
+  // Dentro de uma pessoa (ou "Para todos"), separa os itens por subcategoria
+  const linhasComSub = (mostrar, all, dono, secKey) => {
+    const ord = mostrar.slice().sort(porCat);
+    const cats = [...new Set(ord.map(i=>i.categoria))];
+    if(agr!=="pessoa" || cats.length<2) return ord.map(i=>linhaItem(i,ro,dono?dono(i):"")).join("");
+    return cats.map(c=>{ const tot=all.filter(i=>i.categoria===c); const ok=tot.filter(i=>i.levado).length;
+      const completo = tot.length>0 && ok===tot.length; const k = secKey+"|sub|"+c; const fechado = state.busca ? false : estaFechado(k, completo);
+      return `<button class="sub-h ${completo?"completo":""} ${fechado?"fechado":""}" data-act="colapsar" data-k="${esc(k)}" data-c="${completo?1:0}" aria-expanded="${!fechado}">
+          <span><i class="seta">${fechado?"▸":"▾"}</i>${CAT_ICON[c]||"📦"} ${esc(nomeCat(c))}</span><small>${completo?"✓ Tudo na mala · ":""}${ok}/${tot.length}</small></button>`+
+        (fechado ? "" : ord.filter(i=>i.categoria===c).map(i=>linhaItem(i,ro,dono?dono(i):"")).join("")); }).join("");
+  };
+  if(agr==="pessoa"){
+    const quemDe = i => vmap[i.quem] ? i.quem : "geral";
+    vs.forEach(v=>{
+      const all=t.itens.filter(i=>quemDe(i)===v.id);
+      h += secao(`${iconePerfil(v)} ${esc(v.nome)}`, all, vis.filter(i=>quemDe(i)===v.id), ro?"":` <button class="ren" data-act="renomear" data-id="${v.id}" aria-label="Renomear">✎</button>`, null, v.id);
+    });
+    const gAll=t.itens.filter(i=>quemDe(i)==="geral"&&i.categoria!=="Antes de sair");
+    h += secao("🧳 Para todos", gAll, vis.filter(i=>quemDe(i)==="geral"&&i.categoria!=="Antes de sair"));
+    const cAll=t.itens.filter(i=>i.categoria==="Antes de sair");
+    h += secao("🏠 Antes de sair", cAll, vis.filter(i=>i.categoria==="Antes de sair"));
+  } else {
+    const grupos = {}; vis.forEach(i=>{ (grupos[i.categoria]=grupos[i.categoria]||[]).push(i); });
+    Object.keys(grupos).sort((a,b)=>(CAT_ORDER[a]??10)-(CAT_ORDER[b]??10)).forEach(c=>{
+      h += secao(`${CAT_ICON[c]||"📦"} ${esc(nomeCat(c))}`, t.itens.filter(i=>i.categoria===c), grupos[c], "", i=>vmap[i.quem]?vmap[i.quem].nome:"", "cat|"+c, true);
+    });
+  }
+  if(!ro) h += `<button class="danger" data-act="excluir">Excluir esta viagem</button>`;
+  return h;
+}
+function modalView(){
+  const c=state.confirm; if(!c) return "";
+  return `<div class="modal" data-act="cancel"><div class="box" data-stop="1"><h2>${esc(c.titulo)}</h2>${c.msg?`<p>${esc(c.msg)}</p>`:""}
+    ${c.input!==undefined?`<input id="modalInput" class="minput" value="${esc(c.input)}" maxlength="40">`:""}
+    <div class="acts"><button data-act="cancel">Cancelar</button><button class="ok ${c.input!==undefined?"neutral":""}" data-act="okconfirm">${esc(c.ok)}</button></div></div></div>`;
+}
+function render(){
+  pendingRender=false;
+  const a=document.getElementById("app");
+  if(!sessao || !sessao.nome){ a.innerHTML = authView() + modalView(); return; }
+  if(state.loading){ a.innerHTML=`<div class="loading">Carregando suas viagens…</div>`; return; }
+  if(state.view==="viagem" && !trips[state.tripId]) state.view="home";
+  const ae=document.activeElement, fid = ae && ["busca","addInput","npNome"].includes(ae.id) ? ae.id : null;
+  const sel = fid ? [ae.selectionStart, ae.selectionEnd] : null;
+  a.innerHTML = (state.view==="nova"?novaView():state.view==="viagem"?viagemView(state.tripId):homeView()) + modalView();
+  if(fid){ const el=document.getElementById(fid); if(el){ el.focus(); try{ el.setSelectionRange(sel[0],sel[1]); }catch(e){} } }
+}
+const LOGO = `<div class="logo"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="15" width="30" height="24" rx="7"/><path d="M18 15v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3"/><path d="M17 27l5 5 9-10"/></svg></div>`;
+const ICON_G = `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M22.5 12.3c0-.8-.1-1.5-.2-2.2H12v4.2h5.9a5 5 0 0 1-2.2 3.3v2.7h3.5c2.1-1.9 3.3-4.7 3.3-8z"/><path fill="#34A853" d="M12 23c3 0 5.4-1 7.2-2.7l-3.5-2.7c-1 .7-2.2 1.1-3.7 1.1-2.9 0-5.3-1.9-6.2-4.5H2.2v2.8A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.8 14.2a6.6 6.6 0 0 1 0-4.4V7H2.2a11 11 0 0 0 0 10z"/><path fill="#EA4335" d="M12 5.4c1.6 0 3.1.6 4.2 1.7l3.1-3.1A11 11 0 0 0 2.2 7l3.6 2.8C6.7 7.3 9.1 5.4 12 5.4z"/></svg>`;
+function authView(){
+  const A=state.auth;
+  const topo = `<div class="auth-top">${botaoTema()}</div>`;
+  const aviso = `<p class="demo-note">🔒 Modo demonstração: nenhuma senha é salva ou enviada.</p>`;
+  if(sessao && !sessao.nome){
+    return `${topo}<div class="auth">${LOGO}<h1>Boas-vindas! 👋</h1><p class="sub">Como podemos te chamar?</p>
+      <form id="fNome" autocomplete="off"><label>Seu nome<input name="nome" value="${esc(A.nome)}" placeholder="Ex.: Ana" maxlength="40"></label>
+      ${A.erro?`<p class="erro">${esc(A.erro)}</p>`:""}<button type="submit" class="primary">Começar</button></form></div>`;
+  }
+  const google = `<button type="button" class="google" data-act="google" ${A.carregando?"disabled":""}>${A.carregando?'<span class="spin"></span> Conectando…':ICON_G+" Continuar com Google"}</button>
+    <div class="ou"><span>ou</span></div>`;
+  if(A.tela==="cadastro"){
+    return `${topo}<div class="auth">${LOGO}<p class="eyebrow">AllSet</p><h1>Criar conta</h1><p class="sub">Organize as malas da família sem esquecer nada.</p>${google}
+      <form id="fCad" autocomplete="off" novalidate>
+        <label>Nome<input name="nome" value="${esc(A.nome)}" placeholder="Seu nome" maxlength="40"></label>
+        <label>E-mail<input name="email" type="email" value="${esc(A.email)}" placeholder="voce@email.com"></label>
+        <label>Senha<input name="senha" type="password" placeholder="Mínimo de 6 caracteres" autocomplete="new-password"></label>
+        <label class="check"><input type="checkbox" name="termos"> <span>Li e aceito os termos de uso e a política de privacidade</span></label>
+        ${A.erro?`<p class="erro">${esc(A.erro)}</p>`:""}
+        <button type="submit" class="primary">Criar conta</button></form>
+      <p class="troca">Já tem conta? <button data-act="authTela" data-t="login">Entrar</button></p>${aviso}</div>`;
+  }
+  return `${topo}<div class="auth">${LOGO}<p class="eyebrow">AllSet · Viagens</p><h1>Sua mala pronta,<br>sem esquecer nada.</h1>
+    <p class="sub">Listas de viagem sugeridas para cada pessoa da casa, pelo clima e pelo destino.</p>${google}
+    <form id="fLogin" autocomplete="off" novalidate>
+      <label>E-mail<input name="email" type="email" value="${esc(A.email)}" placeholder="voce@email.com"></label>
+      <label>Senha<input name="senha" type="password" placeholder="Sua senha" autocomplete="current-password"></label>
+      <div class="esq"><button type="button" data-act="esqueci">Esqueci minha senha</button></div>
+      ${A.erro?`<p class="erro">${esc(A.erro)}</p>`:""}
+      <button type="submit" class="primary">Entrar</button></form>
+    <p class="troca">Ainda não tem conta? <button data-act="authTela" data-t="cadastro">Criar conta</button></p>${aviso}</div>`;
+}
+const emailOk = e => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e);
+const nomeDoEmail = e => { const n=(e.split("@")[0]||"").replace(/[._-]+/g," ").replace(/\d+/g,"").trim(); return n ? n.charAt(0).toUpperCase()+n.slice(1) : ""; };
+function entrar(dados){ sessao=dados; salvarSessao(); state.auth={tela:"login",nome:"",email:"",erro:"",carregando:false}; state.view="home"; render(); window.scrollTo(0,0);
+  if(sessao.nome) toast("Olá, "+sessao.nome.split(" ")[0]+"! 👋"); }
+function iniciais(n){ const p=(n||"?").trim().split(/\s+/); return ((p[0]||"")[0]||"?").toUpperCase()+((p[1]||"")[0]||"").toUpperCase(); }
+function renderSeguro(){
+  const ae=document.activeElement;
+  if(ae && ae.tagName==="INPUT" && !["busca","addInput","npNome"].includes(ae.id) && document.getElementById("app").contains(ae)){ pendingRender=true; return; }
+  render();
+}
+setInterval(()=>{ if(pendingRender){ const ae=document.activeElement; if(!(ae&&ae.tagName==="INPUT")) render(); } },1200);
+
+// ---------- eventos ----------
+document.addEventListener("click", e=>{
+  const el=e.target.closest("[data-act]"); if(!el) return;
+  if(el.dataset.act==="cancel" && e.target.closest("[data-stop]") && !e.target.closest("button")) return;
+  const act=el.dataset.act, id=el.dataset.id; const t=trips[state.tripId];
+  switch(act){
+    case "tema": { const n=temaAtual()==="dark"?"light":"dark"; document.documentElement.dataset.theme=n; try{localStorage.setItem("tema",n);}catch(e){} render(); break; }
+    case "google": if(state.auth.carregando) break; state.auth.carregando=true; state.auth.erro=""; render();
+      setTimeout(()=>{ state.auth.carregando=false; entrar({nome:"", email:"", via:"google"}); }, 1200); break;
+    case "authTela": state.auth.tela=el.dataset.t; state.auth.erro=""; render(); break;
+    case "esqueci": toast(state.auth.email&&emailOk(state.auth.email) ? "Enviamos um link de recuperação para "+state.auth.email+" (demonstração)" : "Digite seu e-mail acima para recuperar a senha"); break;
+    case "conta": state.confirm={titulo:sessao.nome, msg:(sessao.email||(sessao.via==="google"?"Conectado com Google":""))+" · Modo demonstração", ok:"Sair", fn:()=>{ sessao=null; salvarSessao(); state.view="home"; }}; render(); break;
+    case "tab": state.tab=el.dataset.tab; render(); break;
+    case "nova": state.view="nova"; state.form=novoForm(); render(); window.scrollTo(0,0); break;
+    case "home": state.view="home"; render(); window.scrollTo(0,0); break;
+    case "abrir": state.view="viagem"; state.tripId=id; state.filtro="todos"; state.busca=""; state.filtroPessoa="todas"; state.addPara="geral"; render(); window.scrollTo(0,0); break;
+    case "tipo": { const s=state.form.tipos; const i=s.indexOf(id); i>=0?s.splice(i,1):s.push(id); render(); break; }
+    case "dia": escolherDia(el.dataset.d); break;
+    case "mes": { const [y,m]=state.form.calMes.split("-").map(Number); const d=new Date(y,m-1+ +el.dataset.delta,1);
+      state.form.calMes=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"); render(); break; }
+    case "limparDatas": state.form.inicio=""; state.form.fim=""; render(); break;
+    case "para": state.addPara=id; render(); break;
+    case "filtroPessoa": state.filtroPessoa=id; render(); break;
+    case "limparBusca": state.busca=""; render(); { const b=document.getElementById("busca"); b&&b.focus(); } break;
+    case "npPerfil": state.novaPessoa.perfil=id; render(); { const i=document.getElementById("npNome"); if(i&&!state.novaPessoa.nome) i.focus(); } break;
+    case "addPessoa": if(adicionarPessoa()) render(); break;
+    case "addPessoaW": { const p=adicionarPessoa(); if(p){ state.form.pessoas.push(p.id); render(); } break; }
+    case "pessoaW": { const s=state.form.pessoas; const i=s.indexOf(id); i>=0?s.splice(i,1):s.push(id); render(); break; }
+    case "todosCasa": state.form.pessoas = state.form.pessoas.length===casa.length ? [] : casa.map(p=>p.id); render(); break;
+    case "renomearPessoa": { const p=casa.find(x=>x.id===id); if(!p) break;
+      state.confirm={titulo:"Renomear",msg:"",input:p.nome,ok:"Salvar",fn:val=>{ val=(val||"").trim(); if(val){ p.nome=val.slice(0,40); salvarCasa(); } }};
+      render(); setTimeout(()=>{ const i=document.getElementById("modalInput"); if(i){ i.focus(); i.select(); } },30); break; }
+    case "removerPessoa": { const p=casa.find(x=>x.id===id); if(!p) break;
+      state.confirm={titulo:"Remover "+p.nome+"?",msg:"Sai do cadastro da casa. As viagens já criadas continuam iguais.",ok:"Remover",fn:()=>{ casa=casa.filter(x=>x.id!==id); salvarCasa(); }}; render(); break; }
+    case "clima": { const s=state.form.clima; const i=s.indexOf(id); i>=0?s.splice(i,1):s.push(id); render(); break; }
+    case "modo": state.form.modo=id; render(); break;
+    case "voltarPasso": state.form.passo=Math.max(0,state.form.passo-1); render(); window.scrollTo(0,0); break;
+    case "irPasso": state.form.passo=+el.dataset.p; render(); window.scrollTo(0,0); break;
+    case "quem": { const q=state.form.quem; q[id]=Math.max(0,Math.min(9,(q[id]||0)+ +el.dataset.d)); render(); break; }
+    case "colapsar": { const k=el.dataset.k, completo=el.dataset.c==="1";
+      if(estaFechado(k,completo)){ colapsados.delete(k); if(completo) abertos.add(k); } else { colapsados.add(k); abertos.delete(k); }
+      render(); break; }
+    case "agrupar": state.agrupar = state.agrupar==="pessoa"?"categoria":"pessoa"; render(); break;
+    case "renomear": { const v=(t&&t.viajantes||[]).find(x=>x.id===id); if(!v) break;
+      state.confirm={titulo:"Nome do viajante",msg:"",input:v.nome,ok:"Salvar",fn:val=>{ val=(val||"").trim(); if(val){ v.nome=val.slice(0,40); salvar(state.tripId); } }};
+      render(); setTimeout(()=>{ const i=document.getElementById("modalInput"); if(i){ i.focus(); i.select(); } },30); break; } { const s=state.form.hist, n=el.dataset.nome; const i=s.indexOf(n); i>=0?s.splice(i,1):s.push(n); render(); break; }
+    case "filtro": state.filtro=el.dataset.f; render(); break;
+    case "toggle": if(state.readonly||!t) break; { const it=t.itens.find(x=>x.id===id); if(it){ it.levado=!it.levado;
+      if(it.levado) [...abertos].forEach(k=>{ if(k.startsWith(state.tripId+"|") && k.endsWith("|"+it.categoria)) abertos.delete(k); });
+      salvar(state.tripId); render(); } } break;
+    case "qty": if(!t) break; { const it=t.itens.find(x=>x.id===id); if(it){ it.qtd=Math.max(1,Math.min(99,it.qtd+ +el.dataset.d)); salvar(state.tripId); render(); } } break;
+    case "del": if(!t) break; { const it=t.itens.find(x=>x.id===id); t.itens=t.itens.filter(x=>x.id!==id); salvar(state.tripId); render(); if(it) toast("Removido: "+it.nome); } break;
+    case "excluir": state.confirm={titulo:"Excluir viagem?",msg:"A lista e o histórico desta viagem serão apagados.",ok:"Excluir",fn:()=>{ apagar(state.tripId); state.view="home"; toast("Viagem excluída"); }}; render(); break;
+    case "okconfirm": { const mi=document.getElementById("modalInput"); const val=mi?mi.value:undefined; const fn=state.confirm&&state.confirm.fn; state.confirm=null; fn&&fn(val); render(); break; }
+    case "cancel": state.confirm=null; render(); break;
+    case "mic": micClick(); break;
+  }
+});
+document.addEventListener("input", e=>{
+  if(e.target.id==="busca"){ state.busca=e.target.value; render(); return; }
+  if(e.target.id==="addInput"){ state.addTxt=e.target.value; return; }
+  if(e.target.id==="npNome"){ state.novaPessoa.nome=e.target.value; return; }
+  if(e.target.closest("#fLogin,#fCad,#fNome") && (e.target.name==="email"||e.target.name==="nome")) state.auth[e.target.name]=e.target.value;
+  const f=e.target.closest("#fNova"); if(!f) return;
+  state.form[e.target.name]=e.target.value;
+  atualizarBotaoPasso();
+});
+document.addEventListener("change", e=>{ if(e.target.id==="addPara") state.addPara=e.target.value; });
+document.addEventListener("keydown", e=>{ if(e.key==="Enter" && e.target.id==="npNome"){ e.preventDefault(); const b=document.querySelector('[data-act="addPessoa"],[data-act="addPessoaW"]'); b&&b.click(); } });
+document.addEventListener("keydown", e=>{ if(e.key==="Enter" && e.target.id==="modalInput"){ e.preventDefault(); const b=document.querySelector('[data-act="okconfirm"]'); b&&b.click(); } });
+document.addEventListener("submit", e=>{
+  e.preventDefault();
+  const A=state.auth, fd = n => (e.target.elements[n]||{}).value || "";
+  if(e.target.id==="fLogin"){
+    const email=fd("email").trim(), senha=fd("senha");
+    if(!emailOk(email)) A.erro="Digite um e-mail válido.";
+    else if(senha.length<6) A.erro="A senha precisa ter pelo menos 6 caracteres.";
+    else { entrar({nome:nomeDoEmail(email), email, via:"email"}); return; }
+    render(); return;
+  }
+  if(e.target.id==="fCad"){
+    const nome=fd("nome").trim(), email=fd("email").trim(), senha=fd("senha"), termos=e.target.elements.termos.checked;
+    if(!nome) A.erro="Conte seu nome.";
+    else if(!emailOk(email)) A.erro="Digite um e-mail válido.";
+    else if(senha.length<6) A.erro="A senha precisa ter pelo menos 6 caracteres.";
+    else if(!termos) A.erro="Para continuar, aceite os termos de uso.";
+    else { entrar({nome, email, via:"email"}); return; }
+    render(); return;
+  }
+  if(e.target.id==="fNome"){
+    const nome=fd("nome").trim(); if(!nome){ A.erro="Conte seu nome."; render(); return; }
+    entrar({...sessao, nome}); return;
+  }
+  if(e.target.id==="fNova"){
+    if(PASSOS[state.form.passo]==="revisao"){ if(!state.readonly) criarViagem(); return; }
+    if(PASSOS[state.form.passo]==="quem" && !Object.values(state.form.quem).some(Boolean) && !state.form.pessoas.length) return;
+    if(PASSOS[state.form.passo]==="datas" && state.form.inicio && !state.form.fim) return;
+    state.form.passo++; render(); window.scrollTo(0,0);
+    const first=document.querySelector("#fNova input"); if(first && PASSOS[state.form.passo]==="destino") first.focus();
+  }
+  if(e.target.id==="fAdd"){
+    const inp=document.getElementById("addInput"); const v=inp.value; inp.value=""; state.addTxt="";
+    processarComando(v,false);
+    const ni=document.getElementById("addInput"); ni&&ni.focus();
+  }
+});
+
+// ---------- voz ----------
+function micClick(){
+  if(!dict) return;
+  if(listening){ dict.stop().catch(()=>{}); return; }
+  dict.start().catch(err=>{
+    const c=(err&&(err.code||err.reason||err.message))||String(err);
+    if(String(c).includes("not_granted")){ dictDenied=true; toast("Sem permissão para o microfone. Você pode digitar normalmente."); render(); }
+    else toast("Não consegui iniciar o microfone agora.");
+  });
+}
+function ligarVoz(){
+  if(!dict) return;
+  dict.onPartial(({text})=>{ const i=document.getElementById("addInput"); if(i) i.value=text||""; });
+  dict.onFinal(({text})=>{
+    const i=document.getElementById("addInput"); if(i) i.value="";
+    if(state.view!=="viagem") return;
+    processarComando(text||"",true);
+  });
+  dict.onState(({state:s})=>{
+    listening = s==="listening";
+    const m=document.getElementById("mic"), h=document.getElementById("hint");
+    if(m) m.classList.toggle("live",listening);
+    if(h){ h.classList.toggle("live",listening);
+      h.textContent = listening?"Ouvindo… ex.: “protetor solar e chinelo” ou “peguei o carregador”":"🎤 Diga os itens para incluir, ou “peguei…” para marcar como levado."; }
+  });
+}
+
+// ---------- início ----------
+const use = n => (window.claude && typeof window.claude.use==="function") ? window.claude.use(n).catch(()=>null) : Promise.resolve(null);
+function modoDemo(){
+  try{ casa=JSON.parse(localStorage.getItem("casa-demo")||"[]")||[]; }catch(e){ casa=[]; }
+  // Na versão independente, a primeira visita já vem com uma família de exemplo (pode editar na aba Casa)
+  try{ if(STANDALONE && localStorage.getItem("casa-demo")===null){
+    casa=[{id:"pa",nome:"Anne",perfil:"mulher"},{id:"pm",nome:"Marcus",perfil:"homem"},{id:"pd",nome:"Davi",perfil:"crianca"},{id:"pt",nome:"Thor",perfil:"cachorro"}];
+    localStorage.setItem("casa-demo",JSON.stringify(casa)); } }catch(e){}
+  state.mode="demo"; modelos=clone(SEED_DEMO.modelos); perfis=clone(SEED_DEMO.perfis); climas=clone(SEED_DEMO.climas); trips=lerLocal(); state.loading=false; render();
+}
+(async function init(){
+  render();
+  if(!(window.claude && window.claude.use)){ modoDemo(); return; }
+  const [d,u,dc] = await Promise.all([use("db"),use("user"),VOZ?use("dictation"):Promise.resolve(null)]);
+  user=u; dict=dc; ligarVoz();
+  if(!d){ modoDemo(); return; }
+  db=d;
+  try{ if(user && user.can){ const w=await user.can("data.write"); if(w===false) state.readonly=true; } }catch(e){}
+  let got={m:false,v:false,p:false,c:false}, fresh={m:false,v:false,p:false,c:false};
+  const todos = o => o.m&&o.v&&o.p&&o.c;
+  const timer=setTimeout(()=>{ if(!todos(fresh)){ state.slowNote=true; state.loading=false; renderSeguro(); } },10000);
+  const pronto=()=>{ if(todos(got) && state.loading){ state.loading=false; render(); } else renderSeguro();
+    if(todos(fresh)){ clearTimeout(timer); if(state.slowNote){ state.slowNote=false; renderSeguro(); } } };
+  const falha=e=>{ clearTimeout(timer); state.loading=false; state.slowNote=true; renderSeguro(); };
+  db.collection("modelos").onSnapshot(s=>{
+    const m={}; s.docs.forEach(doc=>{ m[doc.id]=doc.data(); }); modelos=m;
+    got.m=true; if(!s.metadata.fromCache) fresh.m=true; pronto();
+  }, falha);
+  db.doc("casa/pessoas").onSnapshot(s=>{
+    const d=s.exists?s.data():null; casa = d&&Array.isArray(d.pessoas) ? clone(d.pessoas) : []; renderSeguro();
+  }, ()=>{});
+  db.collection("climas").onSnapshot(s=>{
+    const m={}; s.docs.forEach(doc=>{ m[doc.id]=doc.data(); }); climas=m;
+    got.c=true; if(!s.metadata.fromCache) fresh.c=true; pronto();
+  }, falha);
+  db.collection("perfis").onSnapshot(s=>{
+    const m={}; s.docs.forEach(doc=>{ m[doc.id]=doc.data(); }); perfis=m;
+    got.p=true; if(!s.metadata.fromCache) fresh.p=true; pronto();
+  }, falha);
+  db.collection("viagens").onSnapshot(s=>{
+    const nt={};
+    s.docs.forEach(doc=>{ if(deleted.has(doc.id)) return; if(dirty.has(doc.id)&&trips[doc.id]){ nt[doc.id]=trips[doc.id]; return; } const x=clone(doc.data()); x.itens=Array.isArray(x.itens)?x.itens:[]; nt[doc.id]=x; });
+    dirty.forEach(id=>{ if(!nt[id] && trips[id]) nt[id]=trips[id]; });
+    trips=nt;
+    got.v=true; if(!s.metadata.fromCache) fresh.v=true; pronto();
+  }, falha);
+})();
+</script>
+</body>
+</html>
